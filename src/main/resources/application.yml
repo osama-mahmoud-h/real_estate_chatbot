@@ -1,20 +1,22 @@
 spring:
+  config:
+    import: optional:file:.env[.properties]
   application:
     name: real-estate-chatbot
 
-  profiles:
-    active: dev
+#  profiles:
+#    active: dev
 
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/chatbot_db}
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:postgres}
+    url: jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:5432}/${DATABASE_NAME}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: false
+    show-sql: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
