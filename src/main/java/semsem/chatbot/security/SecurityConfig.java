@@ -35,15 +35,13 @@ public class SecurityConfig {
 //    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
 //    private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
     private static final String[] PUBLIC_ENDPOINTS = {
-        "/api/auth/register",
-        "/api/auth/login",
-        "/api/auth/validate",
-        "/api/auth/validate-header",
-        "/api/auth/verify-registration",
-        "/api/auth/forgot-password",
+        "/api/v1/auth/**",
+        "/api/auth/**",
         "/login/oauth2/**",
         "/oauth2/**",
         "/swagger-ui/**",
+        "/swagger-ui.html",
+        "/v3/api-docs/**",
         "/api-docs/**",
         "/swagger-resources/**",
         "/webjars/**",
