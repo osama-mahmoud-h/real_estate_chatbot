@@ -1,2 +1,13 @@
 /mvnw text eol=lf
 *.cmd text eol=crlf
+.env
+**/targets/**
+/target/
+*.log
+.idea/
+*.iml
+.vscode/
+.DS_Store
+*.class
+*.jar
+*.war

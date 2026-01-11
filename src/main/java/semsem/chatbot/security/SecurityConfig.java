@@ -46,8 +46,7 @@ public class SecurityConfig {
         "/swagger-resources/**",
         "/webjars/**",
         "/configuration/**",
-        "/actuator/**",
-
+        "/actuator/**"
     };
     @Bean
     public PasswordEncoder passwordEncoder() {
