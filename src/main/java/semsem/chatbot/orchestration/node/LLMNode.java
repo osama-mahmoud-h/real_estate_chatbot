@@ -1,6 +1,7 @@
 package semsem.chatbot.orchestration.node;
 
 import lombok.RequiredArgsConstructor;
+import semsem.chatbot.model.enums.GraphNodeNames;
 import semsem.chatbot.orchestration.graph.GraphState;
 import semsem.chatbot.service.llm.LLMService;
 
@@ -10,12 +11,12 @@ import semsem.chatbot.service.llm.LLMService;
 @RequiredArgsConstructor
 public class LLMNode<S extends GraphState> implements GraphNode<S> {
 
-    private final String name;
+    private final GraphNodeNames name;
     private final LLMService llmService;
     private final String promptTemplate;
 
     @Override
-    public String getName() {
+    public GraphNodeNames getName() {
         return name;
     }
 

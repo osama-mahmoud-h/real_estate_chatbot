@@ -1,6 +1,7 @@
 package semsem.chatbot.orchestration.node;
 
 import lombok.RequiredArgsConstructor;
+import semsem.chatbot.model.enums.GraphNodeNames;
 import semsem.chatbot.orchestration.graph.GraphState;
 
 import java.util.function.Function;
@@ -11,21 +12,22 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 public class ConditionalNode<S extends GraphState> implements GraphNode<S> {
 
-    private final String name;
-    private final Function<S, String> conditionEvaluator;
+    private final GraphNodeNames name;
+    private final Function<S, GraphNodeNames> conditionEvaluator;
 
     @Override
-    public String getName() {
+    public GraphNodeNames getName() {
         return name;
     }
 
     @Override
     public S execute(S state) {
-        // TODO: Implement condition evaluation
+        // Conditional nodes don't modify state, they just evaluate conditions
         return state;
     }
 
-    public String evaluateCondition(S state) {
+    public GraphNodeNames evaluateCondition(S state) {
         return conditionEvaluator.apply(state);
     }
 }
+
