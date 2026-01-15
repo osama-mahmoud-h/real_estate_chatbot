@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import semsem.chatbot.rag.Document;
 import semsem.chatbot.rag.DocumentChunk;
+import semsem.chatbot.service.embedding.EmbeddingService;
 
 import java.util.List;
 

@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import semsem.chatbot.rag.Document;
+import semsem.chatbot.rag.DocumentChunk;
 import semsem.chatbot.rag.loader.DocumentLoader;
 import semsem.chatbot.rag.retriever.Retriever;
 import semsem.chatbot.rag.splitter.TextSplitter;
+import semsem.chatbot.service.embedding.EmbeddingService;
 import semsem.chatbot.service.llm.LLMService;
 import semsem.chatbot.vectorstore.VectorStore;
 

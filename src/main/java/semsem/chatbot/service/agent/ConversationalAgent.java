@@ -15,7 +15,6 @@ import java.util.Map;
 public class ConversationalAgent extends BaseAgent {
 
     private final LLMService llmService;
-    private final MemoryService memoryService;
     private final String conversationPrompt;
 
     @Override

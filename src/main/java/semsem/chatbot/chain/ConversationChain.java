@@ -14,7 +14,6 @@ import java.util.Map;
 public class ConversationChain extends BaseChain {
 
     private final LLMService llmService;
-    private final MemoryService memoryService;
     private final String systemPrompt;
 
     @Override
