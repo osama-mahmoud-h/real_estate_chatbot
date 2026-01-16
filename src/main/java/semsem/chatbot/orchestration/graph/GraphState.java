@@ -1,18 +1,58 @@
 package semsem.chatbot.orchestration.graph;
 
-import java.util.Map;
+import semsem.chatbot.orchestration.graph.output.*;
+
+import java.util.List;
 
 /**
- * Immutable state container for graph execution.
- * Holds all data passed between nodes during workflow execution.
+ * Base interface for graph state.
+ * Defines typed fields that nodes read/write during execution.
+ * Each node has its own typed output class - no string keys, full compile-time safety.
  */
 public interface GraphState {
 
-    Map<String, Object> getData();
+    // ==================== Input Fields ====================
+    String getConversationId();
+    void setConversationId(String conversationId);
 
-    GraphState withData(String key, Object value);
+    String getUserQuery();
+    void setUserQuery(String userQuery);
 
-    <T> T get(String key, Class<T> type);
+    List<ChatMessage> getMessages();
+    void setMessages(List<ChatMessage> messages);
+    void addMessage(ChatMessage message);
 
-    GraphState merge(GraphState other);
+    // ==================== Node Outputs (Typed) ====================
+
+    LanguageDetectorOutput getLanguageDetectorOutput();
+    void setLanguageDetectorOutput(LanguageDetectorOutput output);
+
+    IntentClassifierOutput getIntentClassifierOutput();
+    void setIntentClassifierOutput(IntentClassifierOutput output);
+
+    EntityExtractorOutput getEntityExtractorOutput();
+    void setEntityExtractorOutput(EntityExtractorOutput output);
+
+    RagRetrieverOutput getRagRetrieverOutput();
+    void setRagRetrieverOutput(RagRetrieverOutput output);
+
+    SqlGeneratorOutput getSqlGeneratorOutput();
+    void setSqlGeneratorOutput(SqlGeneratorOutput output);
+
+    SqlExecutorOutput getSqlExecutorOutput();
+    void setSqlExecutorOutput(SqlExecutorOutput output);
+
+    ResponseGeneratorOutput getResponseGeneratorOutput();
+    void setResponseGeneratorOutput(ResponseGeneratorOutput output);
+
+    FinalResponseBuilderOutput getFinalResponseBuilderOutput();
+    void setFinalResponseBuilderOutput(FinalResponseBuilderOutput output);
+
+    // ==================== Final Response ====================
+    String getResponse();
+    void setResponse(String response);
+
+    // ==================== Metadata ====================
+    StateMetadata getMetadata();
+    void setMetadata(StateMetadata metadata);
 }

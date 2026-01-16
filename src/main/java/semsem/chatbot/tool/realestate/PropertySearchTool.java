@@ -1,6 +1,5 @@
 package semsem.chatbot.tool.realestate;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import semsem.chatbot.tool.BaseTool;
@@ -13,7 +12,6 @@ import java.util.Map;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class PropertySearchTool extends BaseTool {
 
     public PropertySearchTool() {

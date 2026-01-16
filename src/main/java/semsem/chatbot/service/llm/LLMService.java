@@ -9,6 +9,7 @@ import java.util.Map;
 
 /**
  * Interface for LLM interactions.
+ * Delegates to ChatLLMStrategy implementations.
  */
 public interface LLMService {
 

@@ -1,5 +1,7 @@
 package semsem.chatbot.prompt;
 
+import lombok.Getter;
+
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -7,6 +9,7 @@ import java.util.regex.Pattern;
 /**
  * Template for prompts with variable substitution.
  */
+@Getter
 public class PromptTemplate {
 
     private final String template;
@@ -33,7 +36,4 @@ public class PromptTemplate {
         return new PromptTemplate(template);
     }
 
-    public String getTemplate() {
-        return template;
-    }
 }

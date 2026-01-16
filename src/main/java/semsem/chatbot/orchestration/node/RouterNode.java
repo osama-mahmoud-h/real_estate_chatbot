@@ -1,6 +1,7 @@
 package semsem.chatbot.orchestration.node;
 
 import lombok.RequiredArgsConstructor;
+import semsem.chatbot.model.enums.GraphNodeNames;
 import semsem.chatbot.orchestration.graph.GraphState;
 import semsem.chatbot.service.llm.LLMService;
 
@@ -12,12 +13,12 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class RouterNode<S extends GraphState> implements GraphNode<S> {
 
-    private final String name;
+    private final GraphNodeNames name;
     private final LLMService llmService;
-    private final Map<String, String> routeDescriptions;
+    private final Map<GraphNodeNames, String> routeDescriptions;
 
     @Override
-    public String getName() {
+    public GraphNodeNames getName() {
         return name;
     }
 
@@ -27,7 +28,7 @@ public class RouterNode<S extends GraphState> implements GraphNode<S> {
         return state;
     }
 
-    public String determineRoute(S state) {
+    public GraphNodeNames determineRoute(S state) {
         // TODO: Use LLM to classify and route
         return null;
     }

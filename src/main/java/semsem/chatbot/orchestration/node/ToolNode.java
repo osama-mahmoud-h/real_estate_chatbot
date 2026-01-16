@@ -1,6 +1,7 @@
 package semsem.chatbot.orchestration.node;
 
 import lombok.RequiredArgsConstructor;
+import semsem.chatbot.model.enums.GraphNodeNames;
 import semsem.chatbot.orchestration.graph.GraphState;
 import semsem.chatbot.tool.Tool;
 
@@ -12,11 +13,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ToolNode<S extends GraphState> implements GraphNode<S> {
 
-    private final String name;
+    private final GraphNodeNames name;
     private final List<Tool> tools;
 
     @Override
-    public String getName() {
+    public GraphNodeNames getName() {
         return name;
     }
 

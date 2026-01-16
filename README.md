@@ -202,13 +202,13 @@ CREATE EXTENSION IF NOT EXISTS vector;
 
 -- Create vector chunks table
 CREATE TABLE vector_chunks (
-    id VARCHAR(36) PRIMARY KEY,
-    document_id VARCHAR(36) NOT NULL,
-    content TEXT NOT NULL,
-    chunk_index INTEGER,
-    embedding vector(768),
-    metadata JSONB,
-    created_at TIMESTAMP DEFAULT NOW()
+                               id VARCHAR(36) PRIMARY KEY,
+                               document_id VARCHAR(36) NOT NULL,
+                               content TEXT NOT NULL,
+                               chunk_index INTEGER,
+                               embedding vector(768),
+                               metadata JSONB,
+                               created_at TIMESTAMP DEFAULT NOW()
 );
 
 -- Create HNSW index for fast similarity search
@@ -274,33 +274,33 @@ StateGraph<ChatGraphState> graph = new StateGraph<>();
 
 // Add nodes
 graph.addNode("retrieve", new RAGNode<>(retriever, 5));
-graph.addNode("generate", new LLMNode<>(llmService, ragPrompt));
+        graph.addNode("generate", new LLMNode<>(llmService, ragPrompt));
 
 // Add edges
-graph.addEdge("retrieve", "generate");
+        graph.addEdge("retrieve", "generate");
 graph.setEntryPoint("retrieve");
 graph.setFinishPoint("generate");
 
 // Compile and execute
 CompiledGraph<ChatGraphState> compiled = graph.compile(checkpointer);
 ChatGraphState result = compiled.invoke(ChatGraphState.builder()
-    .userQuery("Find apartments in downtown")
-    .conversationId("conv-123")
-    .build());
+        .userQuery("Find apartments in downtown")
+        .conversationId("conv-123")
+        .build());
 ```
 
 ### Use a Chain
 
 ```java
 RAGChain ragChain = RAGChain.builder()
-    .retriever(hybridRetriever)
-    .llmService(llmService)
-    .promptTemplate(RAGPrompts.CONTEXT_QA)
-    .topK(5)
-    .build();
+        .retriever(hybridRetriever)
+        .llmService(llmService)
+        .promptTemplate(RAGPrompts.CONTEXT_QA)
+        .topK(5)
+        .build();
 
 ChainResult result = ragChain.invoke(Map.of(
-    "question", "What properties are available under $500k?"
+        "question", "What properties are available under $500k?"
 ));
 ```
 
@@ -308,15 +308,15 @@ ChainResult result = ragChain.invoke(Map.of(
 
 ```java
 ReActAgent agent = ReActAgent.builder()
-    .llmService(llmService)
-    .reactPromptTemplate(AgentPrompts.REACT_SYSTEM)
-    .build();
+        .llmService(llmService)
+        .reactPromptTemplate(AgentPrompts.REACT_SYSTEM)
+        .build();
 
 agent.addTool(propertySearchTool);
 agent.addTool(mortgageCalculatorTool);
 
 AgentResponse response = agent.run(
-    "Find me a 3-bedroom house and calculate the mortgage for a 30-year loan"
+        "Find me a 3-bedroom house and calculate the mortgage for a 30-year loan"
 );
 ```
 

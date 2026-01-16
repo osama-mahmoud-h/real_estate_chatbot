@@ -1,5 +1,6 @@
 package semsem.chatbot.orchestration.node;
 
+import semsem.chatbot.model.enums.GraphNodeNames;
 import semsem.chatbot.orchestration.graph.GraphState;
 
 /**
@@ -8,7 +9,7 @@ import semsem.chatbot.orchestration.graph.GraphState;
  */
 public interface GraphNode<S extends GraphState> {
 
-    String getName();
+    GraphNodeNames getName();
 
     S execute(S state);
 }

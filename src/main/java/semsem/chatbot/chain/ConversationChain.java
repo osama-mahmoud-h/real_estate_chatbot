@@ -3,7 +3,6 @@ package semsem.chatbot.chain;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import semsem.chatbot.service.llm.LLMService;
-import semsem.chatbot.service.memory.MemoryService;
 
 import java.util.Map;
 
@@ -15,7 +14,6 @@ import java.util.Map;
 public class ConversationChain extends BaseChain {
 
     private final LLMService llmService;
-    private final MemoryService memoryService;
     private final String systemPrompt;
 
     @Override

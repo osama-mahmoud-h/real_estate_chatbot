@@ -4,12 +4,13 @@ import java.util.List;
 
 /**
  * Interface for generating text embeddings.
+ * Delegates to EmbeddingStrategy implementations.
  */
 public interface EmbeddingService {
 
     float[] embed(String text);
 
-    List<float[]> embed(List<String> texts);
+    List<float[]> embedBatch(List<String> texts);
 
     int getDimensions();
 

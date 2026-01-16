@@ -11,6 +11,7 @@ import java.util.Map;
 
 /**
  * Default implementation of GraphExecutor.
+ * Delegates execution to CompiledGraph which handles the actual workflow.
  */
 @Slf4j
 @Service
@@ -19,25 +20,25 @@ public class DefaultGraphExecutor implements GraphExecutor {
 
     @Override
     public <S extends GraphState> S execute(CompiledGraph<S> graph, S initialState) {
-        // TODO: Implement
-        return null;
+        log.debug("Executing graph starting from {}", graph.getEntryPoint());
+        return graph.invoke(initialState);
     }
 
     @Override
     public <S extends GraphState> S execute(CompiledGraph<S> graph, S initialState, Map<String, Object> config) {
-        // TODO: Implement
-        return null;
+        log.debug("Executing graph with config starting from {}", graph.getEntryPoint());
+        return graph.invoke(initialState, config);
     }
 
     @Override
     public <S extends GraphState> Flux<S> executeStream(CompiledGraph<S> graph, S initialState) {
-        // TODO: Implement
-        return Flux.empty();
+        log.debug("Streaming graph execution starting from {}", graph.getEntryPoint());
+        return graph.stream(initialState);
     }
 
     @Override
     public <S extends GraphState> Flux<S> executeStream(CompiledGraph<S> graph, S initialState, Map<String, Object> config) {
-        // TODO: Implement
-        return Flux.empty();
+        log.debug("Streaming graph execution with config starting from {}", graph.getEntryPoint());
+        return graph.stream(initialState, config);
     }
 }

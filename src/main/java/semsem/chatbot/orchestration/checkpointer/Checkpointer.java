@@ -1,5 +1,6 @@
 package semsem.chatbot.orchestration.checkpointer;
 
+import semsem.chatbot.model.enums.GraphNodeNames;
 import semsem.chatbot.orchestration.graph.GraphState;
 
 import java.util.Optional;
@@ -10,9 +11,9 @@ import java.util.Optional;
  */
 public interface Checkpointer {
 
-    void save(String threadId, String nodeId, GraphState state);
+    void save(String threadId, GraphNodeNames nodeId, GraphState state);
 
-    Optional<GraphState> load(String threadId, String nodeId);
+    Optional<GraphState> load(String threadId, GraphNodeNames nodeId);
 
     Optional<GraphState> loadLatest(String threadId);
 
