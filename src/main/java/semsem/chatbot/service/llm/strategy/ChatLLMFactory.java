@@ -3,8 +3,8 @@ package semsem.chatbot.service.llm.strategy;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import semsem.chatbot.config.AIProperties;
 import semsem.chatbot.model.enums.LLMProvider;
 
 import java.util.EnumMap;
@@ -14,7 +14,8 @@ import java.util.Optional;
 
 /**
  * Factory for selecting Chat LLM strategies.
- * Supports both cloud (Gemini, Cohere) and local (Ollama) providers.
+ * Single Responsibility: selects strategy based on AIProperties.chat.provider
+ * No if-else: uses Map lookup with LLMProvider enum.
  */
 @Slf4j
 @Component
@@ -22,10 +23,8 @@ import java.util.Optional;
 public class ChatLLMFactory {
 
     private final List<ChatLLMStrategy> strategies;
+    private final AIProperties aiProperties;
     private final Map<LLMProvider, ChatLLMStrategy> strategyMap = new EnumMap<>(LLMProvider.class);
-
-    @Value("${llm.chat.default-provider:gemini}")
-    private String defaultProviderKey;
 
     @PostConstruct
     public void init() {
@@ -53,10 +52,11 @@ public class ChatLLMFactory {
     }
 
     /**
-     * Get the default configured strategy.
+     * Get the default configured strategy based on AIProperties.chat.provider.
      */
     public ChatLLMStrategy getDefaultStrategy() {
-        return getStrategy(defaultProviderKey);
+        String configuredProvider = aiProperties.getChat().getProvider();
+        return getStrategy(configuredProvider);
     }
 
     /**

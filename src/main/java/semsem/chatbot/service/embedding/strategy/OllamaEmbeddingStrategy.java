@@ -1,48 +1,57 @@
 package semsem.chatbot.service.embedding.strategy;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import semsem.chatbot.config.AIProperties;
+import semsem.chatbot.config.ai.ModelConfig;
+import semsem.chatbot.config.ai.ProviderConfig;
 import semsem.chatbot.model.enums.EmbeddingProvider;
 
 import java.util.List;
 
 /**
  * Ollama Embedding Strategy (Local).
+ * Single Responsibility: knows only how to call Ollama Embedding API.
  */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class OllamaEmbeddingStrategy extends BaseEmbeddingStrategy {
 
-    @Value("${embedding.ollama.base-url:http://localhost:11434}")
-    private String baseUrl;
+    private final AIProperties aiProperties;
 
-    @Value("${embedding.ollama.model:nomic-embed-text}")
-    private String model;
+    private ProviderConfig getProviderConfig() {
+        return aiProperties.getProviderOrThrow("ollama");
+    }
 
-    private static final int OLLAMA_DIMENSIONS = 768;
-
-    // TODO: Inject WebClient for Ollama Embedding API
+    private ModelConfig getModelConfig() {
+        String modelName = aiProperties.getEmbedding().getModel();
+        return getProviderConfig().getModel(modelName).orElse(null);
+    }
 
     @Override
     public float[] embed(String text) {
+        var config = getProviderConfig();
+        var model = getModelConfig();
+        int dims = model != null ? model.getDimensions() : 768;
+        log.debug("Embedding with Ollama model: {}, baseUrl: {}",
+                aiProperties.getEmbedding().getModel(), config.getBaseUrl());
         // TODO: Implement using Ollama Embedding API
-        log.debug("Embedding with Ollama model: {}", model);
-        return new float[OLLAMA_DIMENSIONS];
+        return new float[dims];
     }
 
     @Override
     public List<float[]> embedBatch(List<String> texts) {
-        // TODO: Implement batch embedding using Ollama API
-        log.debug("Batch embedding {} texts with Ollama model: {}", texts.size(), model);
-        return texts.stream()
-                .map(this::embed)
-                .toList();
+        log.debug("Batch embedding {} texts with Ollama model: {}",
+                texts.size(), aiProperties.getEmbedding().getModel());
+        return texts.stream().map(this::embed).toList();
     }
 
     @Override
     public int getDimensions() {
-        return OLLAMA_DIMENSIONS;
+        var model = getModelConfig();
+        return model != null ? model.getDimensions() : 768;
     }
 
     @Override
@@ -52,12 +61,13 @@ public class OllamaEmbeddingStrategy extends BaseEmbeddingStrategy {
 
     @Override
     public String getModelName() {
-        return model;
+        return aiProperties.getEmbedding().getModel();
     }
 
     @Override
     public boolean isAvailable() {
-        // TODO: Check if Ollama server is reachable
-        return baseUrl != null && !baseUrl.isBlank();
+        return aiProperties.getProvider("ollama")
+                .map(ProviderConfig::isAvailable)
+                .orElse(false);
     }
 }

@@ -1,51 +1,57 @@
 package semsem.chatbot.service.embedding.strategy;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import semsem.chatbot.config.AIProperties;
+import semsem.chatbot.config.ai.ModelConfig;
+import semsem.chatbot.config.ai.ProviderConfig;
 import semsem.chatbot.model.enums.EmbeddingProvider;
 
 import java.util.List;
 
 /**
- * Google Gemini Embedding Strategy (Cloud).
+ * Google Gemini Embedding Strategy.
+ * Single Responsibility: knows only how to call Gemini Embedding API.
  */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class GeminiEmbeddingStrategy extends BaseEmbeddingStrategy {
 
-    @Value("${embedding.gemini.api-key:}")
-    private String apiKey;
+    private final AIProperties aiProperties;
 
-    @Value("${embedding.gemini.model:text-embedding-004}")
-    private String model;
+    private ProviderConfig getProviderConfig() {
+        return aiProperties.getProviderOrThrow("gemini");
+    }
 
-    @Value("${embedding.gemini.base-url:https://generativelanguage.googleapis.com}")
-    private String baseUrl;
-
-    private static final int GEMINI_DIMENSIONS = 768;
-
-    // TODO: Inject WebClient for Gemini Embedding API
+    private ModelConfig getModelConfig() {
+        String modelName = aiProperties.getEmbedding().getModel();
+        return getProviderConfig().getModel(modelName).orElse(null);
+    }
 
     @Override
     public float[] embed(String text) {
+        var config = getProviderConfig();
+        var model = getModelConfig();
+        int dims = model != null ? model.getDimensions() : 768;
+        log.debug("Embedding with Gemini model: {}, baseUrl: {}",
+                aiProperties.getEmbedding().getModel(), config.getBaseUrl());
         // TODO: Implement using Google Gemini Embedding API
-        log.debug("Embedding with Gemini model: {}", model);
-        return new float[GEMINI_DIMENSIONS];
+        return new float[dims];
     }
 
     @Override
     public List<float[]> embedBatch(List<String> texts) {
-        // TODO: Implement batch embedding using Google Gemini API
-        log.debug("Batch embedding {} texts with Gemini model: {}", texts.size(), model);
-        return texts.stream()
-                .map(this::embed)
-                .toList();
+        log.debug("Batch embedding {} texts with Gemini model: {}",
+                texts.size(), aiProperties.getEmbedding().getModel());
+        return texts.stream().map(this::embed).toList();
     }
 
     @Override
     public int getDimensions() {
-        return GEMINI_DIMENSIONS;
+        var model = getModelConfig();
+        return model != null ? model.getDimensions() : 768;
     }
 
     @Override
@@ -55,11 +61,13 @@ public class GeminiEmbeddingStrategy extends BaseEmbeddingStrategy {
 
     @Override
     public String getModelName() {
-        return model;
+        return aiProperties.getEmbedding().getModel();
     }
 
     @Override
     public boolean isAvailable() {
-        return apiKey != null && !apiKey.isBlank();
+        return aiProperties.getProvider("gemini")
+                .map(ProviderConfig::isAvailable)
+                .orElse(false);
     }
 }
