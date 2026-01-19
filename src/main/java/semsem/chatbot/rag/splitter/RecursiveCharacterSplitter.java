@@ -2,6 +2,7 @@ package semsem.chatbot.rag.splitter;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import semsem.chatbot.rag.Document;
 import semsem.chatbot.rag.DocumentChunk;
@@ -14,6 +15,7 @@ import java.util.List;
  */
 @Slf4j
 @Component
+@Primary
 @Setter
 public class RecursiveCharacterSplitter implements TextSplitter {
 
