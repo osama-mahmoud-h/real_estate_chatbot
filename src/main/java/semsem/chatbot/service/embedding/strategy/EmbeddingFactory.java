@@ -3,8 +3,8 @@ package semsem.chatbot.service.embedding.strategy;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import semsem.chatbot.config.AIProperties;
 import semsem.chatbot.model.enums.EmbeddingProvider;
 
 import java.util.EnumMap;
@@ -14,7 +14,8 @@ import java.util.Optional;
 
 /**
  * Factory for selecting Embedding strategies.
- * Supports both cloud (Gemini, Cohere) and local (Ollama) providers.
+ * Single Responsibility: selects strategy based on AIProperties.embedding.provider
+ * No if-else: uses Map lookup with EmbeddingProvider enum.
  */
 @Slf4j
 @Component
@@ -22,10 +23,8 @@ import java.util.Optional;
 public class EmbeddingFactory {
 
     private final List<EmbeddingStrategy> strategies;
+    private final AIProperties aiProperties;
     private final Map<EmbeddingProvider, EmbeddingStrategy> strategyMap = new EnumMap<>(EmbeddingProvider.class);
-
-    @Value("${embedding.default-provider:cohere}")
-    private String defaultProviderKey;
 
     @PostConstruct
     public void init() {
@@ -53,10 +52,11 @@ public class EmbeddingFactory {
     }
 
     /**
-     * Get the default configured strategy.
+     * Get the default configured strategy based on AIProperties.embedding.provider.
      */
     public EmbeddingStrategy getDefaultStrategy() {
-        return getStrategy(defaultProviderKey);
+        String configuredProvider = aiProperties.getEmbedding().getProvider();
+        return getStrategy(configuredProvider);
     }
 
     /**

@@ -2,8 +2,8 @@ package semsem.chatbot.orchestration.workflow;
 
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import semsem.chatbot.model.enums.GraphNodeNames;
 import semsem.chatbot.orchestration.checkpointer.Checkpointer;
@@ -20,7 +20,6 @@ import semsem.chatbot.orchestration.node.impl.*;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class ChatWorkflow {
 
     private final LanguageDetectorNode languageDetectorNode;
@@ -30,6 +29,23 @@ public class ChatWorkflow {
     private final FinalResponseBuilderNode finalResponseBuilderNode;
     private final ChatHistoryBuilderNode chatHistoryBuilderNode;
     private final Checkpointer checkpointer;
+
+    public ChatWorkflow(
+            LanguageDetectorNode languageDetectorNode,
+            EntityExtractorNode entityExtractorNode,
+            SqlGeneratorNode sqlGeneratorNode,
+            SqlExecutorNode sqlExecutorNode,
+            FinalResponseBuilderNode finalResponseBuilderNode,
+            ChatHistoryBuilderNode chatHistoryBuilderNode,
+            @Qualifier("inMemoryCheckpointer") Checkpointer checkpointer) {
+        this.languageDetectorNode = languageDetectorNode;
+        this.entityExtractorNode = entityExtractorNode;
+        this.sqlGeneratorNode = sqlGeneratorNode;
+        this.sqlExecutorNode = sqlExecutorNode;
+        this.finalResponseBuilderNode = finalResponseBuilderNode;
+        this.chatHistoryBuilderNode = chatHistoryBuilderNode;
+        this.checkpointer = checkpointer;
+    }
 
     @Getter
     private CompiledGraph<ChatGraphState> compiledGraph;

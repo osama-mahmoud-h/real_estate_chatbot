@@ -1,52 +1,57 @@
 package semsem.chatbot.service.embedding.strategy;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import semsem.chatbot.config.AIProperties;
+import semsem.chatbot.config.ai.ModelConfig;
+import semsem.chatbot.config.ai.ProviderConfig;
 import semsem.chatbot.model.enums.EmbeddingProvider;
 
 import java.util.List;
 
 /**
- * Cohere Embedding Strategy (Cloud).
+ * Cohere Embedding Strategy.
+ * Single Responsibility: knows only how to call Cohere Embedding API.
  */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class CohereEmbeddingStrategy extends BaseEmbeddingStrategy {
 
-    @Value("${embedding.cohere.api-key:}")
-    private String apiKey;
+    private final AIProperties aiProperties;
 
-    @Value("${embedding.cohere.model:embed-english-v3.0}")
-    private String model;
+    private ProviderConfig getProviderConfig() {
+        return aiProperties.getProviderOrThrow("cohere");
+    }
 
-    @Value("${embedding.cohere.base-url:https://api.cohere.ai}")
-    private String baseUrl;
-
-    private static final int COHERE_DIMENSIONS = 1024;
-
-    // TODO: Inject WebClient for Cohere Embedding API
+    private ModelConfig getModelConfig() {
+        String modelName = aiProperties.getEmbedding().getModel();
+        return getProviderConfig().getModel(modelName).orElse(null);
+    }
 
     @Override
     public float[] embed(String text) {
+        var config = getProviderConfig();
+        var model = getModelConfig();
+        int dims = model != null ? model.getDimensions() : 1024;
+        log.debug("Embedding with Cohere model: {}, baseUrl: {}",
+                aiProperties.getEmbedding().getModel(), config.getBaseUrl());
         // TODO: Implement using Cohere Embedding API
-        log.debug("Embedding with Cohere model: {}", model);
-        return new float[COHERE_DIMENSIONS];
+        return new float[dims];
     }
 
     @Override
     public List<float[]> embedBatch(List<String> texts) {
-        // TODO: Implement batch embedding using Cohere API
-        // Cohere supports batch embedding natively
-        log.debug("Batch embedding {} texts with Cohere model: {}", texts.size(), model);
-        return texts.stream()
-                .map(this::embed)
-                .toList();
+        log.debug("Batch embedding {} texts with Cohere model: {}",
+                texts.size(), aiProperties.getEmbedding().getModel());
+        return texts.stream().map(this::embed).toList();
     }
 
     @Override
     public int getDimensions() {
-        return COHERE_DIMENSIONS;
+        var model = getModelConfig();
+        return model != null ? model.getDimensions() : 1024;
     }
 
     @Override
@@ -56,11 +61,13 @@ public class CohereEmbeddingStrategy extends BaseEmbeddingStrategy {
 
     @Override
     public String getModelName() {
-        return model;
+        return aiProperties.getEmbedding().getModel();
     }
 
     @Override
     public boolean isAvailable() {
-        return apiKey != null && !apiKey.isBlank();
+        return aiProperties.getProvider("cohere")
+                .map(ProviderConfig::isAvailable)
+                .orElse(false);
     }
 }

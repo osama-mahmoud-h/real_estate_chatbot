@@ -7,7 +7,8 @@ A production-ready AI-powered chatbot for real estate applications built with **
 - **LangGraph-style Orchestration**: State-based workflow graphs with conditional routing
 - **RAG Pipeline**: Document ingestion, chunking, embedding, and hybrid retrieval
 - **Autonomous Agents**: ReAct, Plan-and-Execute, and Tool-calling agents
-- **Multi-LLM Support**: Google GenAI, Ollama, OpenAI, Anthropic
+- **LLM-Independent Architecture**: Switch providers/models via config - no code changes
+- **Model Capabilities**: Each model defines its capabilities (streaming, vision, function-calling)
 - **Vector Search**: PostgreSQL with pgvector for semantic search
 - **Conversation Memory**: Short-term, long-term, and summary-based memory
 - **Real Estate Tools**: Property search, viewing scheduler, mortgage calculator
@@ -30,8 +31,8 @@ A production-ready AI-powered chatbot for real estate applications built with **
 │  │  Nodes (LLM, RAG, Tool, Conditional)  │  Edges  │  Checkpointer        │ │
 │  └────────────────────────────────────────────────────────────────────────┘ │
 │  ┌────────────────────────────────────────────────────────────────────────┐ │
-│  │                          Chain Orchestrator                            │ │
-│  │  LLMChain  │  RAGChain  │  RouterChain  │  SequentialChain             │ │
+│  │                     Chain Orchestrator (Typed)                         │ │
+│  │  Chain<I,O>  │  ChainInput  │  ChainOutput  │  ChainCallbacks           │ │
 │  └────────────────────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────────────────────┘
                                       │
@@ -47,8 +48,14 @@ A production-ready AI-powered chatbot for real estate applications built with **
                                       │
                                       ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                            LLM PROVIDER LAYER                                │
-│         LLMFactory → GoogleGenAI │ Ollama │ OpenAI │ Anthropic              │
+│                        LLM PROVIDER LAYER (Strategy)                         │
+│  ┌─────────────────────────────────────────────────────────────────────────┐│
+│  │ AIProperties → ChatLLMFactory → GeminiStrategy │ CohereStrategy │ Ollama││
+│  │              → EmbeddingFactory → GeminiEmbed │ CohereEmbed │ OllamaEmbed│
+│  └─────────────────────────────────────────────────────────────────────────┘│
+│  ┌─────────────────────────────────────────────────────────────────────────┐│
+│  │ Model Capabilities: streaming │ function-calling │ vision │ json-mode   ││
+│  └─────────────────────────────────────────────────────────────────────────┘│
 └─────────────────────────────────────────────────────────────────────────────┘
                                       │
                                       ▼
@@ -64,7 +71,7 @@ A production-ready AI-powered chatbot for real estate applications built with **
 |-------|------------|
 | Framework | Spring Boot 3.5.9, Java 17 |
 | AI/ML | Spring AI 1.1.2 |
-| LLM Providers | Google GenAI, Ollama, OpenAI, Anthropic |
+| LLM Providers | Google Gemini, Ollama, Cohere (Strategy pattern) |
 | Vector Store | PostgreSQL + pgvector |
 | Security | Spring Security, JWT (JJWT 0.12.6) |
 | Streaming | Spring WebFlux, WebSocket |
@@ -76,24 +83,40 @@ A production-ready AI-powered chatbot for real estate applications built with **
 
 ```
 src/main/java/semsem/chatbot/
+├── config/                 # Configuration
+│   ├── AIProperties        # Main AI config entry point
+│   └── ai/                 # AI configuration classes
+│       ├── AbstractModelConfig     # Base class for models
+│       ├── AbstractProviderConfig  # Base class for providers
+│       ├── ModelConfig             # Unified model config with capabilities
+│       ├── ProviderConfig          # Provider credentials & models
+│       ├── ModelCapability         # Capability constants
+│       ├── ChatSelection           # Chat provider/model selection
+│       └── EmbeddingSelection      # Embedding provider/model selection
+│
 ├── orchestration/          # LangGraph-style workflow engine
 │   ├── graph/              # StateGraph, CompiledGraph, GraphState
 │   ├── node/               # LLMNode, RAGNode, ToolNode, RouterNode
 │   ├── checkpointer/       # InMemoryCheckpointer, PostgresCheckpointer
 │   └── executor/           # GraphExecutor
 │
-├── chain/                  # Composable LLM chains
-│   ├── LLMChain            # Simple LLM invocation
-│   ├── RAGChain            # Retrieval-Augmented Generation
-│   ├── RouterChain         # Intent-based routing
-│   ├── SequentialChain     # Chain of chains
-│   └── ConversationChain   # With memory support
+├── chain/                  # Composable LLM chains (Interface-based)
+│   ├── Chain<I,O>          # Generic typed chain interface
+│   ├── ChainInput          # Typed input with validation
+│   ├── ChainOutput         # Typed output with metrics
+│   ├── ChainMemory         # Conversation memory interface
+│   └── ChainCallbacks      # Execution hooks for monitoring
 │
-├── service/agent/          # Autonomous AI agents
-│   ├── ReActAgent          # Reasoning + Acting loop
-│   ├── PlanAndExecuteAgent # Plan then execute
-│   ├── ToolCallingAgent    # Function calling
-│   └── MultiAgentCoordinator
+├── service/
+│   ├── llm/                # LLM providers (Strategy pattern)
+│   │   ├── strategy/       # ChatLLMStrategy, Factory, Gemini/Ollama/Cohere
+│   │   └── dto/            # LLMRequest, LLMResponse
+│   ├── embedding/          # Embedding services (Strategy pattern)
+│   │   └── strategy/       # EmbeddingStrategy, Factory, Gemini/Ollama/Cohere
+│   ├── agent/              # Autonomous AI agents
+│   ├── memory/             # Conversation memory
+│   ├── auth/               # Authentication
+│   └── chat/               # Chat services
 │
 ├── rag/                    # RAG pipeline
 │   ├── loader/             # PDF, DOCX, Web, Text loaders
@@ -102,30 +125,108 @@ src/main/java/semsem/chatbot/
 │   └── pipeline/           # RAGPipeline orchestration
 │
 ├── vectorstore/            # Vector database
-│   ├── VectorStore         # Interface
-│   ├── PGVectorStore       # PostgreSQL pgvector
-│   └── SpringAIVectorStore # Spring AI integration
-│
-├── service/
-│   ├── llm/                # LLM providers (Google, Ollama, OpenAI, Anthropic)
-│   ├── embedding/          # Embedding services
-│   ├── memory/             # Conversation memory
-│   ├── auth/               # Authentication
-│   └── chat/               # Chat services
-│
 ├── tool/                   # Agent tools
-│   ├── realestate/         # PropertySearch, ScheduleViewing, MortgageCalc
-│   └── common/             # WebSearch, Calculator
-│
-├── prompt/                 # Prompt templates
-│   ├── templates/          # RAG, Agent, Chat prompts
-│   └── builder/            # PromptBuilder, FewShotBuilder
-│
+├── prompt/                 # Prompt templates & loaders
 ├── controller/             # REST API
 ├── security/               # JWT authentication
-├── model/                  # Entities, DTOs
+├── model/                  # Entities, DTOs, Enums
 └── repository/             # Data access
 ```
+
+## AI Configuration Architecture
+
+The project uses an **LLM-independent architecture** with model capabilities:
+
+```
+AIProperties (Main Entry Point)
+├── chat: ChatSelection
+│   ├── provider: "gemini"           # from env: AI_CHAT_PROVIDER
+│   ├── model: "gemini-2.0-flash"    # from env: AI_CHAT_MODEL
+│   ├── temperature: 0.7
+│   └── maxTokens: 4096
+│
+├── embedding: EmbeddingSelection
+│   ├── provider: "cohere"           # can differ from chat!
+│   └── model: "embed-english-v3.0"
+│
+└── providers: Map<String, ProviderConfig>
+    ├── gemini:
+    │   ├── apiKey: ${GOOGLE_AI_API_KEY}
+    │   ├── baseUrl: https://...
+    │   └── models:
+    │       ├── gemini-2.0-flash:
+    │       │   ├── type: chat
+    │       │   ├── contextWindow: 1048576
+    │       │   ├── maxOutputTokens: 8192
+    │       │   └── capabilities: [streaming, function-calling, vision, json-mode]
+    │       └── text-embedding-004:
+    │           ├── type: embedding
+    │           ├── dimensions: 768
+    │           └── capabilities: [batch]
+    │
+    ├── cohere:
+    │   └── ... (similar structure)
+    │
+    └── ollama:
+        └── ... (similar structure)
+```
+
+### Class Hierarchy
+
+```
+AbstractModelConfig (abstract)
+├── type, capabilities, properties (flexible Map)
+├── hasCapability(), getInt(), getString()
+└── ModelConfig (concrete)
+    ├── contextWindow, maxOutputTokens (chat)
+    ├── dimensions, maxInputTokens (embedding)
+    └── supportsStreaming(), supportsFunctionCalling(), supportsVision()
+
+AbstractProviderConfig (abstract)
+├── apiKey, baseUrl, models
+├── getModel(), isAvailable()
+└── ProviderConfig (concrete)
+```
+
+### Model Capabilities
+
+```java
+// Check if model supports a feature before using it
+ModelConfig model = aiProperties.getChatModelOrThrow();
+
+if (model.supportsFunctionCalling()) {
+    // Use function calling
+}
+
+if (model.supportsVision()) {
+    // Handle image input
+}
+
+if (model.hasCapability("custom-capability")) {
+    // Custom capability check
+}
+
+// Access flexible properties
+int contextWindow = model.getContextWindow();
+String customProp = model.getString("custom-property", "default");
+```
+
+### Available Capabilities
+
+**Chat Models:**
+- `streaming` - Token streaming support
+- `function-calling` - Tool/function calling
+- `vision` - Image input support
+- `json-mode` - Structured JSON output
+- `system-prompt` - System message support
+- `rag` - Built-in RAG support
+- `code-generation` - Optimized for code
+
+**Embedding Models:**
+- `batch` - Batch embedding support
+- `multilingual` - Multi-language support
+- `search-document` - Document embedding type
+- `search-query` - Query embedding type
 
 ## What's Completed
 
@@ -137,53 +238,45 @@ src/main/java/semsem/chatbot/
 - [x] Swagger/OpenAPI documentation
 - [x] Conversation & Message management APIs
 
-### Architecture (Skeleton)
-- [x] **Orchestration Layer**: StateGraph, GraphNode, GraphEdge, CompiledGraph, Checkpointer
-- [x] **Chain Layer**: Chain, LLMChain, RAGChain, RouterChain, SequentialChain, ParallelChain
-- [x] **Agent Layer**: Agent, ReActAgent, PlanAndExecuteAgent, ToolCallingAgent, MultiAgentCoordinator
-- [x] **RAG Pipeline**: DocumentLoader, TextSplitter, Retriever, RAGPipeline
-- [x] **Vector Store**: VectorStore interface, PGVectorStore, SpringAIVectorStore
-- [x] **Embedding**: EmbeddingService, Google/Ollama implementations
-- [x] **Memory**: ShortTermMemory, LongTermMemory, SummaryMemory
-- [x] **LLM Providers**: LLMService, LLMFactory, Google/Ollama/OpenAI/Anthropic services
-- [x] **Tools**: Tool interface, ToolRegistry, Real estate tools
-- [x] **Prompts**: PromptTemplate, ChatPromptTemplate, predefined templates
+### AI Configuration (New)
+- [x] **AIProperties**: Unified configuration entry point
+- [x] **Abstract classes**: `AbstractModelConfig`, `AbstractProviderConfig`
+- [x] **Model capabilities**: Flexible capability checking system
+- [x] **Provider-agnostic**: Chat and Embedding can use different providers
+- [x] **Config-driven**: Switch provider/model via env vars only
+- [x] **LLMProvider enum**: Type-safe provider identification
 
-### DTOs & Models
-- [x] ChatCompletionRequest/Response
-- [x] RAGRequest/Response
-- [x] AgentRequest/AgentExecutionResponse
-- [x] WorkflowRequest/Response
-- [x] VectorChunkEntity
+### Architecture (Completed)
+- [x] **Orchestration Layer**: StateGraph, GraphNode, GraphEdge, CompiledGraph
+- [x] **Chain Layer**: Interface-based typed chain architecture
+- [x] **Agent Layer**: ReActAgent, PlanAndExecuteAgent, ToolCallingAgent
+- [x] **RAG Pipeline**: DocumentLoader, TextSplitter, Retriever interfaces
+- [x] **Vector Store**: VectorStore interface, PGVectorStore
+- [x] **LLM Strategies**: ChatLLMStrategy with Gemini, Cohere, Ollama
+- [x] **Embedding Strategies**: EmbeddingStrategy with Gemini, Cohere, Ollama
+- [x] **Factories**: ChatLLMFactory, EmbeddingFactory for strategy selection
+- [x] **Memory**: ShortTermMemory, LongTermMemory, SummaryMemory
+- [x] **Prompts**: Multi-format loading (JSON, TXT, YAML) with registry
 
 ## What's TODO
 
 ### High Priority
-- [ ] **Implement LLM Services**: Wire up Spring AI ChatModel for each provider
+- [ ] **Implement LLM API calls**: Wire strategies to actual provider APIs
+- [ ] **Add model override support**: Request specific provider+model at runtime
 - [ ] **Implement RAG Pipeline**: Complete loader, splitter, retriever logic
-- [ ] **Implement VectorStore**: Add pgvector operations with native queries
-- [ ] **Implement Embedding Services**: Connect to Spring AI EmbeddingModel
-- [ ] **Enable Spring AI Dependencies**: Uncomment in pom.xml
+- [ ] **Implement VectorStore**: Add pgvector operations
 
 ### Medium Priority
 - [ ] **Implement StateGraph Execution**: Complete graph traversal logic
-- [ ] **Implement Chain Logic**: Add prompt formatting and LLM calls
 - [ ] **Implement Agent Loops**: ReAct, Plan-and-Execute patterns
-- [ ] **Implement Memory Persistence**: Save/load conversation history
 - [ ] **Add Streaming Support**: SSE endpoints for token streaming
+- [ ] **Add Model Enums**: Type-safe model names per provider
 
 ### Lower Priority
 - [ ] **Add Redis Caching**: Cache embeddings and LLM responses
 - [ ] **Add Rate Limiting**: Bucket4j for API throttling
 - [ ] **Add Circuit Breaker**: Resilience4j for LLM failover
 - [ ] **Add Metrics**: Micrometer for observability
-- [ ] **Add Message Queue**: Async document ingestion
-- [ ] **Add WebSocket Chat**: Real-time chat interface
-- [ ] **Add Reranking**: Cross-encoder reranking for retrieval
-
-### Database
-- [ ] **Create pgvector Migration**: Add vector_chunks table with HNSW index
-- [ ] **Add Full-Text Search Index**: For hybrid retrieval
 
 ## Getting Started
 
@@ -194,46 +287,31 @@ src/main/java/semsem/chatbot/
 - PostgreSQL 15+ with pgvector extension
 - (Optional) Ollama for local LLM
 
-### Database Setup
-
-```sql
--- Enable pgvector extension
-CREATE EXTENSION IF NOT EXISTS vector;
-
--- Create vector chunks table
-CREATE TABLE vector_chunks (
-                               id VARCHAR(36) PRIMARY KEY,
-                               document_id VARCHAR(36) NOT NULL,
-                               content TEXT NOT NULL,
-                               chunk_index INTEGER,
-                               embedding vector(768),
-                               metadata JSONB,
-                               created_at TIMESTAMP DEFAULT NOW()
-);
-
--- Create HNSW index for fast similarity search
-CREATE INDEX idx_vector_chunks_embedding
-    ON vector_chunks USING hnsw (embedding vector_cosine_ops);
-```
-
 ### Configuration
 
-Create `.env` file or set environment variables:
+Create `.env` file (see `.env.example`):
 
 ```env
+# Database
 DATABASE_HOST=localhost
 DATABASE_PORT=5432
 DATABASE_NAME=chatbot_db
 DATABASE_USERNAME=postgres
-DATABASE_PASSWORD=postgres
+DATABASE_PASSWORD=your_password
 
-JWT_SECRET=your-base64-encoded-secret-key
-
-# LLM Providers (at least one required)
-GOOGLE_AI_API_KEY=your-google-api-key
+# AI Provider Credentials (secrets)
+GOOGLE_AI_API_KEY=your_google_api_key
+COHERE_API_KEY=your_cohere_api_key
 OLLAMA_BASE_URL=http://localhost:11434
-OPENAI_API_KEY=your-openai-key
-ANTHROPIC_API_KEY=your-anthropic-key
+
+# AI Model Selection
+AI_CHAT_PROVIDER=ollama          # gemini | cohere | ollama
+AI_CHAT_MODEL=llama3.2
+AI_EMBEDDING_PROVIDER=ollama     # can differ from chat!
+AI_EMBEDDING_MODEL=nomic-embed-text
+
+# JWT
+JWT_SECRET=your_base64_encoded_secret
 ```
 
 ### Build & Run
@@ -247,9 +325,6 @@ ANTHROPIC_API_KEY=your-anthropic-key
 
 # Test
 ./mvnw test
-
-# Package
-./mvnw package
 ```
 
 ### API Endpoints
@@ -266,42 +341,44 @@ ANTHROPIC_API_KEY=your-anthropic-key
 
 ## Usage Examples
 
+### Get LLM Strategy
+
+```java
+@Autowired
+private ChatLLMFactory chatLLMFactory;
+
+// Get default configured strategy
+ChatLLMStrategy strategy = chatLLMFactory.getDefaultStrategy();
+
+// Get by provider enum
+ChatLLMStrategy gemini = chatLLMFactory.getStrategy(LLMProvider.GEMINI);
+
+// Get first available
+ChatLLMStrategy available = chatLLMFactory.getAvailableStrategy();
+
+// Check model capabilities
+ModelConfig model = aiProperties.getChatModelOrThrow();
+if (model.supportsFunctionCalling()) {
+    // Use tools
+}
+```
+
 ### Create a RAG Workflow
 
 ```java
-// Define the workflow graph
 StateGraph<ChatGraphState> graph = new StateGraph<>();
 
-// Add nodes
 graph.addNode("retrieve", new RAGNode<>(retriever, 5));
-        graph.addNode("generate", new LLMNode<>(llmService, ragPrompt));
-
-// Add edges
-        graph.addEdge("retrieve", "generate");
+graph.addNode("generate", new LLMNode<>(llmService, ragPrompt));
+graph.addEdge("retrieve", "generate");
 graph.setEntryPoint("retrieve");
 graph.setFinishPoint("generate");
 
-// Compile and execute
 CompiledGraph<ChatGraphState> compiled = graph.compile(checkpointer);
 ChatGraphState result = compiled.invoke(ChatGraphState.builder()
         .userQuery("Find apartments in downtown")
         .conversationId("conv-123")
         .build());
-```
-
-### Use a Chain
-
-```java
-RAGChain ragChain = RAGChain.builder()
-        .retriever(hybridRetriever)
-        .llmService(llmService)
-        .promptTemplate(RAGPrompts.CONTEXT_QA)
-        .topK(5)
-        .build();
-
-ChainResult result = ragChain.invoke(Map.of(
-        "question", "What properties are available under $500k?"
-));
 ```
 
 ### Execute an Agent
@@ -316,7 +393,7 @@ agent.addTool(propertySearchTool);
 agent.addTool(mortgageCalculatorTool);
 
 AgentResponse response = agent.run(
-        "Find me a 3-bedroom house and calculate the mortgage for a 30-year loan"
+        "Find me a 3-bedroom house and calculate the mortgage"
 );
 ```
 
