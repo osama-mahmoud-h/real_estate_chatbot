@@ -2,6 +2,7 @@ package semsem.chatbot.vectorstore;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import semsem.chatbot.rag.DocumentChunk;
 import semsem.chatbot.vectorstore.repository.VectorChunkRepository;
@@ -15,6 +16,7 @@ import java.util.Map;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Primary
 public class PGVectorStore implements VectorStore {
 
     private final VectorChunkRepository vectorChunkRepository;

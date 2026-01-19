@@ -3,6 +3,7 @@ package semsem.chatbot.rag.retriever;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import semsem.chatbot.rag.DocumentChunk;
 import semsem.chatbot.service.embedding.EmbeddingService;
@@ -18,6 +19,7 @@ import java.util.Map;
 @Component
 @RequiredArgsConstructor
 @Setter
+@Primary
 public class VectorRetriever implements Retriever {
 
     private final VectorStore vectorStore;
