@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
-import semsem.chatbot.config.AIProperties;
-import semsem.chatbot.config.ai.ModelConfig;
-import semsem.chatbot.config.ai.ProviderConfig;
+import semsem.chatbot.config.LLMProperties;
+import semsem.chatbot.config.llm.chat.ChatModelConfig;
+import semsem.chatbot.config.llm.ProviderConfig;
 import semsem.chatbot.model.enums.LLMProvider;
 import semsem.chatbot.service.llm.dto.LLMRequest;
 
@@ -22,43 +22,43 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class OllamaChatStrategy extends BaseChatLLMStrategy {
 
-    private final AIProperties aiProperties;
+    private final LLMProperties llmProperties;
 
     private ProviderConfig getProviderConfig() {
-        return aiProperties.getProviderOrThrow("ollama");
+        return llmProperties.getProviderOrThrow("ollama");
     }
 
-    private ModelConfig getModelConfig() {
-        String modelName = aiProperties.getChat().getModel();
-        return getProviderConfig().getModel(modelName).orElse(null);
+    private ChatModelConfig getModelConfig() {
+        String modelName = llmProperties.getChat().getModel();
+        return getProviderConfig().getChatModel(modelName).orElse(null);
     }
 
     @Override
     public String generate(String prompt, Map<String, Object> options) {
         var config = getProviderConfig();
         log.debug("Generating with Ollama model: {}, baseUrl: {}",
-                aiProperties.getChat().getModel(), config.getBaseUrl());
+                llmProperties.getChat().getModel(), config.getBaseUrl());
         // TODO: Implement using Ollama API
         return "";
     }
 
     @Override
     public Flux<String> generateStream(String prompt, Map<String, Object> options) {
-        log.debug("Streaming with Ollama model: {}", aiProperties.getChat().getModel());
+        log.debug("Streaming with Ollama model: {}", llmProperties.getChat().getModel());
         // TODO: Implement streaming
         return Flux.empty();
     }
 
     @Override
     public String chat(List<Map<String, String>> messages, Map<String, Object> options) {
-        log.debug("Chat with Ollama model: {}", aiProperties.getChat().getModel());
+        log.debug("Chat with Ollama model: {}", llmProperties.getChat().getModel());
         // TODO: Implement chat
         return "";
     }
 
     @Override
     public Flux<String> chatStream(List<Map<String, String>> messages) {
-        log.debug("Chat streaming with Ollama model: {}", aiProperties.getChat().getModel());
+        log.debug("Chat streaming with Ollama model: {}", llmProperties.getChat().getModel());
         // TODO: Implement streaming chat
         return Flux.empty();
     }
@@ -76,12 +76,12 @@ public class OllamaChatStrategy extends BaseChatLLMStrategy {
 
     @Override
     public String getModelName() {
-        return aiProperties.getChat().getModel();
+        return llmProperties.getChat().getModel();
     }
 
     @Override
     public boolean isAvailable() {
-        return aiProperties.getProvider("ollama")
+        return llmProperties.getProvider("ollama")
                 .map(ProviderConfig::isAvailable)
                 .orElse(false);
     }
