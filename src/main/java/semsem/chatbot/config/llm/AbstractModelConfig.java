@@ -1,4 +1,4 @@
-package semsem.chatbot.config.ai;
+package semsem.chatbot.config.llm;
 
 import lombok.Data;
 
@@ -10,28 +10,74 @@ import java.util.Map;
 /**
  * Abstract base for model configurations.
  * Provides common properties and capability checking.
- * Subclasses can add model-specific properties.
+ * Subclasses (ChatModelConfig, EmbeddingModelConfig) add model-specific properties.
  */
 @Data
-public abstract class AbstractModelConfig {
+public abstract class AbstractModelConfig implements IModelConfig {
 
     /** Model type identifier */
     protected String type;
 
-    /** Model capabilities */
+    /** Model capabilities (stored as strings for YAML binding compatibility) */
     protected List<String> capabilities = new ArrayList<>();
 
     /** Flexible extra properties */
     protected Map<String, Object> properties = new HashMap<>();
 
     // =========================================================================
-    // CAPABILITY CHECKING
+    // CAPABILITY CHECKING (IModelConfig interface implementation)
     // =========================================================================
 
+    @Override
+    public boolean hasCapability(ModelCapability capability) {
+        if (capabilities == null || capability == null) {
+            return false;
+        }
+        return capabilities.contains(capability.getValue());
+    }
+
+    @Override
+    public boolean hasAllCapabilities(ModelCapability... required) {
+        if (required == null) {
+            return true;
+        }
+        for (ModelCapability cap : required) {
+            if (!hasCapability(cap)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public boolean hasAnyCapability(ModelCapability... required) {
+        if (required == null) {
+            return false;
+        }
+        for (ModelCapability cap : required) {
+            if (hasCapability(cap)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // =========================================================================
+    // STRING-BASED CAPABILITY CHECKING (for backward compatibility)
+    // =========================================================================
+
+    /**
+     * Check if the model has a specific capability by string value.
+     * Prefer using hasCapability(ModelCapability) for type safety.
+     */
     public boolean hasCapability(String capability) {
         return capabilities != null && capabilities.contains(capability);
     }
 
+    /**
+     * Check if the model has all specified capabilities by string values.
+     * Prefer using hasAllCapabilities(ModelCapability...) for type safety.
+     */
     public boolean hasAllCapabilities(String... required) {
         for (String cap : required) {
             if (!hasCapability(cap)) {
@@ -41,6 +87,10 @@ public abstract class AbstractModelConfig {
         return true;
     }
 
+    /**
+     * Check if the model has any of the specified capabilities by string values.
+     * Prefer using hasAnyCapability(ModelCapability...) for type safety.
+     */
     public boolean hasAnyCapability(String... required) {
         for (String cap : required) {
             if (hasCapability(cap)) {

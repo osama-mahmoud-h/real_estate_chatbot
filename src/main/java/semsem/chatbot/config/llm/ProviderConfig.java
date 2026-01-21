@@ -1,4 +1,4 @@
-package semsem.chatbot.config.ai;
+package semsem.chatbot.config.llm;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

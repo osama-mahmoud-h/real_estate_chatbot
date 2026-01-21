@@ -4,7 +4,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import semsem.chatbot.config.AIProperties;
+import semsem.chatbot.config.LLMProperties;
 import semsem.chatbot.model.enums.LLMProvider;
 
 import java.util.EnumMap;
@@ -23,7 +23,7 @@ import java.util.Optional;
 public class ChatLLMFactory {
 
     private final List<ChatLLMStrategy> strategies;
-    private final AIProperties aiProperties;
+    private final LLMProperties llmProperties;
     private final Map<LLMProvider, ChatLLMStrategy> strategyMap = new EnumMap<>(LLMProvider.class);
 
     @PostConstruct
@@ -55,7 +55,7 @@ public class ChatLLMFactory {
      * Get the default configured strategy based on AIProperties.chat.provider.
      */
     public ChatLLMStrategy getDefaultStrategy() {
-        String configuredProvider = aiProperties.getChat().getProvider();
+        String configuredProvider = llmProperties.getChat().getProvider();
         return getStrategy(configuredProvider);
     }
 

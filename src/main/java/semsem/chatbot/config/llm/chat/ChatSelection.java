@@ -1,13 +1,15 @@
-package semsem.chatbot.config.ai;
+package semsem.chatbot.config.llm.chat;
 
 import lombok.Data;
+import semsem.chatbot.config.llm.ISelection;
 
 /**
  * Chat model selection configuration.
  * Specifies which provider and model to use for chat.
+ * Implements ISelection interface.
  */
 @Data
-public class ChatSelection {
+public class ChatSelection implements ISelection {
 
     /** Provider name: gemini | cohere | ollama */
     private String provider = "ollama";

@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
-import semsem.chatbot.config.AIProperties;
-import semsem.chatbot.config.ai.ModelConfig;
-import semsem.chatbot.config.ai.ProviderConfig;
+import semsem.chatbot.config.LLMProperties;
+import semsem.chatbot.config.llm.chat.ChatModelConfig;
+import semsem.chatbot.config.llm.ProviderConfig;
 import semsem.chatbot.model.enums.LLMProvider;
 import semsem.chatbot.service.llm.dto.LLMRequest;
 
@@ -22,15 +22,15 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class GeminiChatStrategy extends BaseChatLLMStrategy {
 
-    private final AIProperties aiProperties;
+    private final LLMProperties llmProperties;
 
     private ProviderConfig getProviderConfig() {
-        return aiProperties.getProviderOrThrow("gemini");
+        return llmProperties.getProviderOrThrow("gemini");
     }
 
-    private ModelConfig getModelConfig() {
-        String modelName = aiProperties.getChat().getModel();
-        return getProviderConfig().getModel(modelName).orElse(null);
+    private ChatModelConfig getModelConfig() {
+        String modelName = llmProperties.getChat().getModel();
+        return getProviderConfig().getChatModel(modelName).orElse(null);
     }
 
     @Override
@@ -38,7 +38,7 @@ public class GeminiChatStrategy extends BaseChatLLMStrategy {
         var config = getProviderConfig();
         var model = getModelConfig();
         log.debug("Generating with Gemini model: {}, baseUrl: {}",
-                aiProperties.getChat().getModel(), config.getBaseUrl());
+                llmProperties.getChat().getModel(), config.getBaseUrl());
         if (model != null && model.supportsVision()) {
             log.debug("Model supports vision capability");
         }
@@ -48,21 +48,21 @@ public class GeminiChatStrategy extends BaseChatLLMStrategy {
 
     @Override
     public Flux<String> generateStream(String prompt, Map<String, Object> options) {
-        log.debug("Streaming with Gemini model: {}", aiProperties.getChat().getModel());
+        log.debug("Streaming with Gemini model: {}", llmProperties.getChat().getModel());
         // TODO: Implement streaming
         return Flux.empty();
     }
 
     @Override
     public String chat(List<Map<String, String>> messages, Map<String, Object> options) {
-        log.debug("Chat with Gemini model: {}", aiProperties.getChat().getModel());
+        log.debug("Chat with Gemini model: {}", llmProperties.getChat().getModel());
         // TODO: Implement chat
         return "";
     }
 
     @Override
     public Flux<String> chatStream(List<Map<String, String>> messages) {
-        log.debug("Chat streaming with Gemini model: {}", aiProperties.getChat().getModel());
+        log.debug("Chat streaming with Gemini model: {}", llmProperties.getChat().getModel());
         // TODO: Implement streaming chat
         return Flux.empty();
     }
@@ -80,12 +80,12 @@ public class GeminiChatStrategy extends BaseChatLLMStrategy {
 
     @Override
     public String getModelName() {
-        return aiProperties.getChat().getModel();
+        return llmProperties.getChat().getModel();
     }
 
     @Override
     public boolean isAvailable() {
-        return aiProperties.getProvider("gemini")
+        return llmProperties.getProvider("gemini")
                 .map(ProviderConfig::isAvailable)
                 .orElse(false);
     }

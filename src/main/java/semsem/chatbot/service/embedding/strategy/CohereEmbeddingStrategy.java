@@ -3,9 +3,9 @@ package semsem.chatbot.service.embedding.strategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import semsem.chatbot.config.AIProperties;
-import semsem.chatbot.config.ai.ModelConfig;
-import semsem.chatbot.config.ai.ProviderConfig;
+import semsem.chatbot.config.LLMProperties;
+import semsem.chatbot.config.llm.embedding.EmbeddingModelConfig;
+import semsem.chatbot.config.llm.ProviderConfig;
 import semsem.chatbot.model.enums.EmbeddingProvider;
 
 import java.util.List;
@@ -19,15 +19,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CohereEmbeddingStrategy extends BaseEmbeddingStrategy {
 
-    private final AIProperties aiProperties;
+    private final LLMProperties llmProperties;
 
     private ProviderConfig getProviderConfig() {
-        return aiProperties.getProviderOrThrow("cohere");
+        return llmProperties.getProviderOrThrow("cohere");
     }
 
-    private ModelConfig getModelConfig() {
-        String modelName = aiProperties.getEmbedding().getModel();
-        return getProviderConfig().getModel(modelName).orElse(null);
+    private EmbeddingModelConfig getModelConfig() {
+        String modelName = llmProperties.getEmbedding().getModel();
+        return getProviderConfig().getEmbeddingModel(modelName).orElse(null);
     }
 
     @Override
@@ -36,7 +36,7 @@ public class CohereEmbeddingStrategy extends BaseEmbeddingStrategy {
         var model = getModelConfig();
         int dims = model != null ? model.getDimensions() : 1024;
         log.debug("Embedding with Cohere model: {}, baseUrl: {}",
-                aiProperties.getEmbedding().getModel(), config.getBaseUrl());
+                llmProperties.getEmbedding().getModel(), config.getBaseUrl());
         // TODO: Implement using Cohere Embedding API
         return new float[dims];
     }
@@ -44,7 +44,7 @@ public class CohereEmbeddingStrategy extends BaseEmbeddingStrategy {
     @Override
     public List<float[]> embedBatch(List<String> texts) {
         log.debug("Batch embedding {} texts with Cohere model: {}",
-                texts.size(), aiProperties.getEmbedding().getModel());
+                texts.size(), llmProperties.getEmbedding().getModel());
         return texts.stream().map(this::embed).toList();
     }
 
@@ -61,12 +61,12 @@ public class CohereEmbeddingStrategy extends BaseEmbeddingStrategy {
 
     @Override
     public String getModelName() {
-        return aiProperties.getEmbedding().getModel();
+        return llmProperties.getEmbedding().getModel();
     }
 
     @Override
     public boolean isAvailable() {
-        return aiProperties.getProvider("cohere")
+        return llmProperties.getProvider("cohere")
                 .map(ProviderConfig::isAvailable)
                 .orElse(false);
     }
