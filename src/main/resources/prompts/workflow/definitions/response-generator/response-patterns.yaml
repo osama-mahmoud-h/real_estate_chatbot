@@ -1,0 +1,58 @@
+patterns:
+  - intent: SEARCH_PROPERTIES
+    has_results: true
+    guidelines:
+      - "Start with count summary: 'I found X properties matching your criteria'"
+      - List top 3-5 properties with key details
+      - Mention if there are more results available
+      - Suggest refinements if too many results
+
+  - intent: SEARCH_PROPERTIES
+    has_results: false
+    guidelines:
+      - Acknowledge no exact matches
+      - Suggest relaxing criteria (price range, location, bedrooms)
+      - Offer to search with modified parameters
+
+  - intent: VIEW_PROPERTY_DETAILS
+    guidelines:
+      - Present property as a compelling listing
+      - "Organize: location, price, size, bedrooms/baths, features, agent info"
+      - Highlight standout features
+
+  - intent: GET_PROPERTY_STATS
+    guidelines:
+      - Present statistics in context
+      - Compare to broader market if relevant
+      - "Make numbers meaningful (e.g., 'ranging from $X to $Y')"
+
+  - intent: COMPARE_PROPERTIES
+    guidelines:
+      - Create a clear comparison
+      - Highlight differences and similarities
+      - Offer a recommendation if appropriate
+
+  - intent: GET_FEATURED_PROPERTIES
+    guidelines:
+      - Present as curated recommendations
+      - Highlight what makes each property special
+
+  - intent: GET_RECENT_LISTINGS
+    guidelines:
+      - Present as new arrivals
+      - Emphasize listing dates and availability
+
+  - intent: GENERAL_QUESTION
+    guidelines:
+      - Answer based on real estate knowledge
+      - Be helpful and informative
+
+  - intent: GREETING
+    guidelines:
+      - Respond warmly
+      - Briefly explain what you can help with
+
+  - intent: OUT_OF_SCOPE
+    guidelines:
+      - Politely redirect to real estate topics
+      - Explain what you can help with

@@ -1,0 +1,79 @@
+patterns:
+  - intent: SEARCH_PROPERTIES
+    pattern: |
+      SELECT p.property_id, p.title, p.property_type, p.listing_type, p.price,
+             p.city, p.state, p.bedrooms, p.bathrooms, p.area_sqft,
+             pi.image_url as primary_image
+      FROM properties p
+      LEFT JOIN property_images pi ON p.property_id = pi.property_id AND pi.is_primary = true
+      WHERE p.property_status = 'active'
+        AND (:property_type IS NULL OR p.property_type = :property_type::property_type_enum)
+        AND (:city IS NULL OR LOWER(p.city) = LOWER(:city))
+      ORDER BY p.listed_date DESC
+      LIMIT :limit OFFSET :offset
+    notes: Add more WHERE conditions based on extracted entities
+
+  - intent: VIEW_PROPERTY_DETAILS
+    pattern: |
+      SELECT p.*, u.first_name || ' ' || u.last_name as owner_name,
+             a.agency_name, a.rating as agent_rating
+      FROM properties p
+      JOIN users u ON p.owner_id = u.user_id
+      LEFT JOIN agents a ON p.agent_id = a.agent_id
+      WHERE p.property_id = :property_id
+    notes: Include subqueries for images and features when needed
+
+  - intent: GET_PROPERTY_STATS
+    pattern: |
+      SELECT COUNT(*) as total_count,
+             AVG(price) as avg_price,
+             MIN(price) as min_price,
+             MAX(price) as max_price
+      FROM properties
+      WHERE property_status = 'active'
+        AND (:property_type IS NULL OR property_type = :property_type::property_type_enum)
+    notes: Add location and other filters as needed
+
+  - intent: COMPARE_PROPERTIES
+    pattern: |
+      SELECT p.property_id, p.title, p.property_type, p.price,
+             p.city, p.state, p.bedrooms, p.bathrooms, p.area_sqft
+      FROM properties p
+      WHERE p.property_id IN (:property_ids)
+    notes: Compare selected properties side by side
+
+  - intent: GET_FEATURED_PROPERTIES
+    pattern: |
+      SELECT p.property_id, p.title, p.property_type, p.price,
+             p.city, p.state, p.bedrooms, p.bathrooms, p.area_sqft
+      FROM properties p
+      WHERE p.property_status = 'active' AND p.is_featured = true
+      ORDER BY p.listed_date DESC
+      LIMIT :limit
+    notes: Return featured/highlighted listings
+
+  - intent: GET_RECENT_LISTINGS
+    pattern: |
+      SELECT p.property_id, p.title, p.property_type, p.price,
+             p.city, p.state, p.bedrooms, p.bathrooms, p.area_sqft
+      FROM properties p
+      WHERE p.property_status = 'active'
+      ORDER BY p.listed_date DESC
+      LIMIT :limit
+    notes: Return most recent listings
+
+  - intent: GET_AGENT_INFO
+    pattern: |
+      SELECT a.agent_id, u.first_name, u.last_name, a.agency_name,
+             a.rating, a.years_experience, u.email, u.phone
+      FROM agents a
+      JOIN users u ON a.user_id = u.user_id
+      WHERE (:agent_id IS NULL OR a.agent_id = :agent_id)
+    notes: Filter by agent ID if provided
+
+  - intent: LIST_FEATURES
+    pattern: |
+      SELECT f.feature_id, f.feature_name, f.category
+      FROM features f
+      ORDER BY f.category, f.feature_name
+    notes: List all available features/amenities

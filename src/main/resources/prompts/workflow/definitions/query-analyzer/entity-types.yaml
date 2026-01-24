@@ -1,0 +1,69 @@
+entities:
+  - name: property_type
+    type: enum
+    description: Type of property
+    possible_values: [house, apartment, condo, townhouse, land, commercial]
+
+  - name: listing_type
+    type: enum
+    description: Type of listing
+    possible_values: [sale, rent, lease]
+
+  - name: location
+    type: object
+    description: Location details
+    fields: [city, state, country, neighborhood, postal_code]
+
+  - name: price_range
+    type: object
+    description: Price bounds
+    fields: [min, max, currency]
+    defaults:
+      currency: USD
+
+  - name: bedrooms
+    type: object
+    description: Bedroom count
+    fields: [min, max, exact]
+
+  - name: bathrooms
+    type: object
+    description: Bathroom count
+    fields: [min, max, exact]
+
+  - name: area_sqft
+    type: object
+    description: Area in square feet
+    fields: [min, max]
+
+  - name: features
+    type: array
+    description: Desired amenities
+    possible_values: [pool, garage, garden, gym, parking, elevator, balcony, fireplace]
+
+  - name: year_built
+    type: object
+    description: Construction year range
+    fields: [min, max]
+
+  - name: property_status
+    type: enum
+    description: Listing status
+    possible_values: [active, pending, sold, rented, inactive]
+
+  - name: property_ids
+    type: array
+    description: Specific property IDs referenced by user
+
+  - name: agent_id
+    type: integer
+    description: Specific agent ID referenced by user
+
+  - name: sort_by
+    type: enum
+    description: Result ordering
+    possible_values: [price_asc, price_desc, date_newest, date_oldest, area]
+
+  - name: limit
+    type: integer
+    description: Max number of results to return

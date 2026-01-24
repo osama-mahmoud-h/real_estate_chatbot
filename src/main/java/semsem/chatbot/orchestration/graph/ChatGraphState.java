@@ -17,7 +17,7 @@ import java.util.List;
 public class ChatGraphState implements GraphState {
 
     // ==================== Input Fields ====================
-    private String conversationId;
+    private Long conversationId;
     private String userQuery;
 
     @Builder.Default
@@ -25,8 +25,7 @@ public class ChatGraphState implements GraphState {
 
     // ==================== Node Outputs (Typed) ====================
     private LanguageDetectorOutput languageDetectorOutput;
-    private IntentClassifierOutput intentClassifierOutput;
-    private EntityExtractorOutput entityExtractorOutput;
+    private QueryAnalyzerOutput entityExtractorOutput;  // Combined intent + entity extraction
     private RagRetrieverOutput ragRetrieverOutput;
     private SqlGeneratorOutput sqlGeneratorOutput;
     private SqlExecutorOutput sqlExecutorOutput;
@@ -51,7 +50,7 @@ public class ChatGraphState implements GraphState {
     /**
      * Create initial state from user query.
      */
-    public static ChatGraphState fromQuery(String conversationId, String query) {
+    public static ChatGraphState fromQuery(Long conversationId, String query) {
         List<ChatMessage> messages = new ArrayList<>();
         messages.add(ChatMessage.user(query));
 
@@ -66,7 +65,7 @@ public class ChatGraphState implements GraphState {
     /**
      * Create initial state with thread context.
      */
-    public static ChatGraphState withContext(String conversationId, String query,
+    public static ChatGraphState withContext(Long conversationId, String query,
                                               String threadId, String userId) {
         List<ChatMessage> messages = new ArrayList<>();
         messages.add(ChatMessage.user(query));

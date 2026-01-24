@@ -48,10 +48,8 @@ public class MessageMapper {
     }
 
     public Message toEntity(CreateMessageRequest request, Conversation conversation) {
-        String messageId = generateMessageId();
 
         return Message.builder()
-                .messageId(messageId)
                 .conversation(conversation)
                 .role(request.getRole())
                 .content(request.getContent())
@@ -95,7 +93,5 @@ public class MessageMapper {
         }
     }
 
-    private String generateMessageId() {
-        return "msg_" + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
-    }
+
 }

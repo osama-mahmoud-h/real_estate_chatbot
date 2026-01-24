@@ -21,7 +21,7 @@ import java.util.List;
 public class ConversationResponse {
 
     @Schema(description = "Unique conversation identifier", example = "conv_123abc")
-    private String conversationId;
+    private Long conversationId;
 
     @Schema(description = "Conversation title", example = "Real Estate Inquiry")
     private String title;

@@ -12,8 +12,8 @@ import java.util.List;
 public interface GraphState {
 
     // ==================== Input Fields ====================
-    String getConversationId();
-    void setConversationId(String conversationId);
+    Long getConversationId();
+    void setConversationId(Long conversationId);
 
     String getUserQuery();
     void setUserQuery(String userQuery);
@@ -27,11 +27,8 @@ public interface GraphState {
     LanguageDetectorOutput getLanguageDetectorOutput();
     void setLanguageDetectorOutput(LanguageDetectorOutput output);
 
-    IntentClassifierOutput getIntentClassifierOutput();
-    void setIntentClassifierOutput(IntentClassifierOutput output);
-
-    EntityExtractorOutput getEntityExtractorOutput();
-    void setEntityExtractorOutput(EntityExtractorOutput output);
+    QueryAnalyzerOutput getEntityExtractorOutput();  // Combined intent + entity extraction
+    void setEntityExtractorOutput(QueryAnalyzerOutput output);
 
     RagRetrieverOutput getRagRetrieverOutput();
     void setRagRetrieverOutput(RagRetrieverOutput output);

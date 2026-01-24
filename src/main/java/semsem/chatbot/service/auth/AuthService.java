@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import semsem.chatbot.exception.ApiException;
 import semsem.chatbot.exception.ConflictException;
 import semsem.chatbot.exception.UnauthorizedException;
 import semsem.chatbot.model.dto.request.LoginRequest;
@@ -37,25 +38,29 @@ public class AuthService {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new ConflictException("Email already registered");
         }
+        try{
+            AppUser user = AppUser.builder()
+                    .firstName(request.getFirstName())
+                    .lastName(request.getLastName())
+                    .email(request.getEmail())
+                    .password(passwordEncoder.encode(request.getPassword()))
+                    .phoneNumber(request.getPhoneNumber())
+                    .roles(Set.of(UserRole.USER))
+                    .enabled(true)
+                    .accountNonExpired(true)
+                    .accountNonLocked(true)
+                    .credentialsNonExpired(true)
+                    .emailVerified(false)
+                    .build();
 
-        AppUser user = AppUser.builder()
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .phoneNumber(request.getPhoneNumber())
-                .roles(Set.of(UserRole.USER))
-                .enabled(true)
-                .accountNonExpired(true)
-                .accountNonLocked(true)
-                .credentialsNonExpired(true)
-                .emailVerified(false)
-                .build();
+            AppUser savedUser = userRepository.save(user);
+            log.info("User registered successfully: {}", savedUser.getEmail());
 
-        AppUser savedUser = userRepository.save(user);
-        log.info("User registered successfully: {}", savedUser.getEmail());
-
-        return generateAuthResponse(savedUser);
+            return generateAuthResponse(savedUser);
+        }catch (Exception ex){
+            ex.printStackTrace();
+            throw new ApiException("Error Occurred While processing "+ ex.getMessage());
+        }
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -90,20 +95,25 @@ public class AuthService {
     }
 
     private AuthResponse generateAuthResponse(AppUser user) {
-        String accessToken = jwtTokenProvider.generateAccessToken(user);
-        String refreshToken = jwtTokenProvider.generateRefreshToken(user);
+        try {
+            String accessToken = jwtTokenProvider.generateAccessToken(user);
+            String refreshToken = jwtTokenProvider.generateRefreshToken(user);
 
-        return AuthResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .tokenType("Bearer")
-                .expiresIn(jwtTokenProvider.getAccessTokenExpirationMs() / 1000)
-                .user(AuthResponse.UserInfo.builder()
-                        .userId(user.getUserId())
-                        .firstName(user.getFirstName())
-                        .lastName(user.getLastName())
-                        .email(user.getEmail())
-                        .build())
-                .build();
+            return AuthResponse.builder()
+                    .accessToken(accessToken)
+                    .refreshToken(refreshToken)
+                    .tokenType("Bearer")
+                    .expiresIn(jwtTokenProvider.getAccessTokenExpirationMs() / 1000)
+                    .user(AuthResponse.UserInfo.builder()
+                            .userId(user.getUserId())
+                            .firstName(user.getFirstName())
+                            .lastName(user.getLastName())
+                            .email(user.getEmail())
+                            .build())
+                    .build();
+        }catch (Exception ex){
+            ex.printStackTrace();
+            throw new ApiException(ex.getMessage());
+        }
     }
 }

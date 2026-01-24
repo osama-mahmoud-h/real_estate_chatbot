@@ -2,8 +2,10 @@ package semsem.chatbot.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.type.SqlTypes;
 import semsem.chatbot.model.enums.ConversationStatus;
 
 import java.time.Instant;
@@ -21,10 +23,9 @@ public class Conversation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private Long id;
+    @Column(name = "conversation_id")
+    private Long conversationId;
 
-    @Column(name = "conversation_id", nullable = false, unique = true)
-    private String conversationId;
 
     @Column(name = "title")
     private String title;
@@ -47,9 +48,6 @@ public class Conversation {
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private ConversationStatus status;
-
-    @Column(name = "metadata", columnDefinition = "jsonb")
-    private String metadata; // Store additional info as JSON
 
     @Column(name = "token_count")
     private Integer tokenCount;

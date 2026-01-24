@@ -49,7 +49,7 @@ public class ConversationController {
     @Operation(summary = "Get a conversation by ID")
     public ResponseEntity<MyApiResponse<ConversationResponse>> getConversation(
             @AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable String conversationId,
+            @PathVariable Long conversationId,
             @Parameter(description = "Include messages in response")
             @RequestParam(defaultValue = "false") boolean includeMessages
     ) {
@@ -105,7 +105,7 @@ public class ConversationController {
     @Operation(summary = "Update a conversation")
     public ResponseEntity<MyApiResponse<ConversationResponse>> updateConversation(
             @AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable String conversationId,
+            @PathVariable Long conversationId,
             @Valid @RequestBody UpdateConversationRequest request
     ) {
         ConversationResponse response = conversationService.updateConversation(
@@ -120,7 +120,7 @@ public class ConversationController {
     @Operation(summary = "Archive a conversation")
     public ResponseEntity<MyApiResponse<Void>> archiveConversation(
             @AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable String conversationId
+            @PathVariable Long conversationId
     ) {
         conversationService.archiveConversation(userDetails.getUsername(), conversationId);
         return ResponseEntity.ok(MyApiResponse.success("Conversation archived successfully"));
@@ -130,7 +130,7 @@ public class ConversationController {
     @Operation(summary = "Delete a conversation")
     public ResponseEntity<MyApiResponse<Void>> deleteConversation(
             @AuthenticationPrincipal UserDetails userDetails,
-            @PathVariable String conversationId
+            @PathVariable Long conversationId
     ) {
         conversationService.deleteConversation(userDetails.getUsername(), conversationId);
         return ResponseEntity.ok(MyApiResponse.success("Conversation deleted successfully"));

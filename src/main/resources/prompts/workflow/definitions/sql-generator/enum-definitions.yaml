@@ -1,0 +1,15 @@
+enums:
+  - name: user_type_enum
+    values: [buyer, seller, agent, admin]
+
+  - name: property_type_enum
+    values: [house, apartment, condo, townhouse, land, commercial]
+
+  - name: listing_type_enum
+    values: [sale, rent, lease]
+
+  - name: property_status_enum
+    values: [active, pending, sold, rented, inactive]
+
+  - name: feature_category_enum
+    values: [interior, exterior, community, utilities]

@@ -2,8 +2,7 @@ package semsem.chatbot.model.enums;
 
 public enum GraphNodeNames {
     LANGUAGE_DETECTOR,
-    INTENT_CLASSIFIER,
-    ENTITY_EXTRACTOR,
+    ENTITY_EXTRACTOR,       // Combined intent + entity extraction
     RAG_RETRIEVER,
     RESPONSE_GENERATOR,
     SQL_GENERATOR,
