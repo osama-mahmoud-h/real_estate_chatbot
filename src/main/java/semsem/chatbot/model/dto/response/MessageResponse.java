@@ -20,10 +20,10 @@ import java.time.Instant;
 public class MessageResponse {
 
     @Schema(description = "Unique message identifier", example = "msg_456def")
-    private String messageId;
+    private Long messageId;
 
     @Schema(description = "Conversation ID this message belongs to", example = "conv_123abc")
-    private String conversationId;
+    private Long conversationId;
 
     @Schema(description = "Message role")
     private MessageRole role;

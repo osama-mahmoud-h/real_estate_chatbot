@@ -32,7 +32,7 @@ public class MessageController {
     @PostMapping
     @Operation(summary = "Create a new message in a conversation")
     public ResponseEntity<MyApiResponse<MessageResponse>> createMessage(
-            @PathVariable String conversationId,
+            @PathVariable Long conversationId,
             @Valid @RequestBody CreateMessageRequest request
     ) {
         MessageResponse response = messageService.createMessage(conversationId, request);
@@ -44,7 +44,7 @@ public class MessageController {
     @GetMapping
     @Operation(summary = "Get all messages in a conversation")
     public ResponseEntity<MyApiResponse<List<MessageResponse>>> getConversationMessages(
-            @PathVariable String conversationId
+            @PathVariable Long conversationId
     ) {
         List<MessageResponse> messages = messageService.getConversationMessages(conversationId);
         return ResponseEntity.ok(MyApiResponse.success(messages));
@@ -53,7 +53,7 @@ public class MessageController {
     @GetMapping("/paged")
     @Operation(summary = "Get messages in a conversation with pagination")
     public ResponseEntity<MyApiResponse<Page<MessageResponse>>> getConversationMessagesPaged(
-            @PathVariable String conversationId,
+            @PathVariable Long conversationId,
             @Parameter(description = "Page number (0-based)")
             @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Page size")
@@ -67,7 +67,7 @@ public class MessageController {
     @GetMapping("/recent")
     @Operation(summary = "Get recent messages in a conversation")
     public ResponseEntity<MyApiResponse<List<MessageResponse>>> getRecentMessages(
-            @PathVariable String conversationId,
+            @PathVariable Long conversationId,
             @Parameter(description = "Number of recent messages to retrieve")
             @RequestParam(defaultValue = "10") int limit
     ) {
@@ -78,7 +78,7 @@ public class MessageController {
     @GetMapping("/last")
     @Operation(summary = "Get the last message in a conversation")
     public ResponseEntity<MyApiResponse<MessageResponse>> getLastMessage(
-            @PathVariable String conversationId
+            @PathVariable Long conversationId
     ) {
         MessageResponse message = messageService.getLastMessage(conversationId);
         return ResponseEntity.ok(MyApiResponse.success(message));
@@ -87,7 +87,7 @@ public class MessageController {
     @GetMapping("/role/{role}")
     @Operation(summary = "Get messages by role in a conversation")
     public ResponseEntity<MyApiResponse<List<MessageResponse>>> getMessagesByRole(
-            @PathVariable String conversationId,
+            @PathVariable Long conversationId,
             @PathVariable MessageRole role
     ) {
         List<MessageResponse> messages = messageService.getConversationMessagesByRole(conversationId, role);
@@ -97,7 +97,7 @@ public class MessageController {
     @GetMapping("/search")
     @Operation(summary = "Search messages in a conversation")
     public ResponseEntity<MyApiResponse<List<MessageResponse>>> searchMessages(
-            @PathVariable String conversationId,
+            @PathVariable Long conversationId,
             @Parameter(description = "Search keyword")
             @RequestParam String keyword
     ) {
@@ -108,7 +108,7 @@ public class MessageController {
     @GetMapping("/since")
     @Operation(summary = "Get messages since a specific timestamp")
     public ResponseEntity<MyApiResponse<List<MessageResponse>>> getMessagesSince(
-            @PathVariable String conversationId,
+            @PathVariable Long conversationId,
             @Parameter(description = "ISO timestamp (e.g., 2024-01-01T00:00:00Z)")
             @RequestParam Instant since
     ) {
@@ -119,7 +119,7 @@ public class MessageController {
     @GetMapping("/stats")
     @Operation(summary = "Get message statistics for a conversation")
     public ResponseEntity<MyApiResponse<MessageStatsResponse>> getMessageStats(
-            @PathVariable String conversationId
+            @PathVariable Long conversationId
     ) {
         MessageStatsResponse stats = messageService.getMessageStats(conversationId);
         return ResponseEntity.ok(MyApiResponse.success(stats));
@@ -128,7 +128,7 @@ public class MessageController {
     @DeleteMapping
     @Operation(summary = "Delete all messages in a conversation")
     public ResponseEntity<MyApiResponse<Void>> deleteConversationMessages(
-            @PathVariable String conversationId
+            @PathVariable Long conversationId
     ) {
         messageService.deleteConversationMessages(conversationId);
         return ResponseEntity.ok(MyApiResponse.success("All messages deleted successfully"));

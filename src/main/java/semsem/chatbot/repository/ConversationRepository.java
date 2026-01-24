@@ -17,9 +17,9 @@ import java.util.Optional;
 @Repository
 public interface ConversationRepository extends JpaRepository<Conversation, Long> {
 
-    Optional<Conversation> findByConversationId(String conversationId);
+    Optional<Conversation> findByConversationId(Long conversationId);
 
-    boolean existsByConversationId(String conversationId);
+    boolean existsByConversationId(Long conversationId);
 
     @Query("SELECT c FROM Conversation c WHERE c.appUser.userId = :userId ORDER BY c.updatedAt DESC")
     Page<Conversation> findByUserId(@Param("userId") Long userId, Pageable pageable);
@@ -43,7 +43,7 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
     @Query("SELECT c FROM Conversation c WHERE c.appUser.email = :email AND c.conversationId = :conversationId")
     Optional<Conversation> findByUserEmailAndConversationId(
             @Param("email") String email,
-            @Param("conversationId") String conversationId
+            @Param("conversationId") Long conversationId
     );
 
     @Query("SELECT c FROM Conversation c WHERE c.title LIKE %:keyword% AND c.appUser.userId = :userId")
@@ -61,7 +61,7 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
     @Modifying
     @Query("UPDATE Conversation c SET c.status = :status, c.updatedAt = :updatedAt WHERE c.conversationId = :conversationId")
     int updateStatus(
-            @Param("conversationId") String conversationId,
+            @Param("conversationId") Long conversationId,
             @Param("status") ConversationStatus status,
             @Param("updatedAt") Instant updatedAt
     );
@@ -69,7 +69,7 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
     @Modifying
     @Query("UPDATE Conversation c SET c.title = :title, c.updatedAt = :updatedAt WHERE c.conversationId = :conversationId")
     int updateTitle(
-            @Param("conversationId") String conversationId,
+            @Param("conversationId") Long conversationId,
             @Param("title") String title,
             @Param("updatedAt") Instant updatedAt
     );
@@ -77,7 +77,7 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
     @Modifying
     @Query("UPDATE Conversation c SET c.summary = :summary, c.updatedAt = :updatedAt WHERE c.conversationId = :conversationId")
     int updateSummary(
-            @Param("conversationId") String conversationId,
+            @Param("conversationId") Long conversationId,
             @Param("summary") String summary,
             @Param("updatedAt") Instant updatedAt
     );

@@ -1,6 +1,8 @@
 # Real Estate AI Chatbot
+- Still Under Development - Core Architecture & Scaffolding Completed
+- Not Ready for Production Use
 
-A production-ready AI-powered chatbot for real estate applications built with **Spring Boot 3.5**, **Spring AI 1.1.2**, and a **LangGraph-style architecture**. Features RAG (Retrieval-Augmented Generation), autonomous agents, composable chains, and multi-provider LLM support.
+LLM-powered chatbot for real estate applications built with **Spring Boot 3.5**, **Spring AI 1.1.2**, and a **LangGraph-style architecture**. Features RAG (Retrieval-Augmented Generation), autonomous agents, composable chains, and multi-provider LLM support.
 
 ## Features
 
@@ -63,6 +65,21 @@ A production-ready AI-powered chatbot for real estate applications built with **
 │                           INFRASTRUCTURE LAYER                               │
 │  PostgreSQL  │  PGVector (Embeddings)  │  Redis (Cache)  │  Message Queue  │
 └─────────────────────────────────────────────────────────────────────────────┘
+```
+
+## Chat Workflow Graph
+
+The chat endpoint (`POST /api/v1/chat`) executes a LangGraph-style state graph with the following node pipeline:
+
+```mermaid
+graph TD
+    START(["START"]) --> A["LANGUAGE_DETECTOR<br/>Detect query language"]
+    A --> B["ENTITY_EXTRACTOR<br/>Extract intent & entities"]
+    B --> C["SQL_GENERATOR<br/>Generate safe read-only SQL"]
+    C --> D["SQL_EXECUTOR<br/>Execute query against DB"]
+    D --> E["FINAL_RESPONSE_BUILDER<br/>Generate natural language response"]
+    E --> F["CHAT_HISTORY_BUILDER<br/>Persist conversation history"]
+    F --> END(["END"])
 ```
 
 ## Tech Stack
@@ -238,7 +255,7 @@ String customProp = model.getString("custom-property", "default");
 - [x] Swagger/OpenAPI documentation
 - [x] Conversation & Message management APIs
 
-### AI Configuration (New)
+### AI Configuration
 - [x] **AIProperties**: Unified configuration entry point
 - [x] **Abstract classes**: `AbstractModelConfig`, `AbstractProviderConfig`
 - [x] **Model capabilities**: Flexible capability checking system
@@ -246,37 +263,79 @@ String customProp = model.getString("custom-property", "default");
 - [x] **Config-driven**: Switch provider/model via env vars only
 - [x] **LLMProvider enum**: Type-safe provider identification
 
-### Architecture (Completed)
+### Architecture (Interfaces & Scaffolds)
 - [x] **Orchestration Layer**: StateGraph, GraphNode, GraphEdge, CompiledGraph
+- [x] **StateGraph Execution**: Core graph traversal logic with conditional routing
 - [x] **Chain Layer**: Interface-based typed chain architecture
-- [x] **Agent Layer**: ReActAgent, PlanAndExecuteAgent, ToolCallingAgent
+- [x] **Agent Layer**: ReActAgent, PlanAndExecuteAgent, ToolCallingAgent scaffolds
 - [x] **RAG Pipeline**: DocumentLoader, TextSplitter, Retriever interfaces
-- [x] **Vector Store**: VectorStore interface, PGVectorStore
-- [x] **LLM Strategies**: ChatLLMStrategy with Gemini, Cohere, Ollama
-- [x] **Embedding Strategies**: EmbeddingStrategy with Gemini, Cohere, Ollama
+- [x] **Vector Store**: VectorStore interface, PGVectorStore class
+- [x] **LLM Strategies**: ChatLLMStrategy interface with Gemini, Cohere, Ollama
+- [x] **Embedding Strategies**: EmbeddingStrategy interface with Gemini, Cohere, Ollama
 - [x] **Factories**: ChatLLMFactory, EmbeddingFactory for strategy selection
-- [x] **Memory**: ShortTermMemory, LongTermMemory, SummaryMemory
+- [x] **Memory**: ShortTermMemory, LongTermMemory, SummaryMemory interfaces
 - [x] **Prompts**: Multi-format loading (JSON, TXT, YAML) with registry
+
+### Chat Workflow (End-to-End)
+- [x] **Chat endpoint**: `POST /api/v1/chat` via ChatController
+- [x] **LLMChattingService**: Orchestrates the chat graph execution
+- [x] **Graph Nodes**: LanguageDetector, EntityExtractor, SqlGenerator, SqlExecutor, FinalResponseBuilder, ChatHistoryBuilder
+- [x] **Delegated Services**: EntityExtractionService, SqlGeneratorService, SqlExecutorService, ResponseGeneratorService
+- [x] **Prompt Definitions**: PromptDefinitionsLoader with workflow prompts
+- [x] **ChatGraphState**: State management with node outputs
+- [x] **DTOs**: ChatRequestDto, ChatResponseDto, QueryAnalyzerOutput
 
 ## What's TODO
 
-### High Priority
-- [ ] **Implement LLM API calls**: Wire strategies to actual provider APIs
-- [ ] **Add model override support**: Request specific provider+model at runtime
-- [ ] **Implement RAG Pipeline**: Complete loader, splitter, retriever logic
-- [ ] **Implement VectorStore**: Add pgvector operations
+### High Priority (Core Functionality)
+| Task | Status | Details |
+|------|--------|---------|
+| **Implement LLM API calls** | Not Started | Wire GeminiChatStrategy, OllamaChatStrategy, CohereChatStrategy to actual APIs |
+| **Implement Embedding APIs** | Not Started | Wire embedding strategies to provider APIs |
+| **Implement VectorStore** | Not Started | Add pgvector operations (add, search, delete) in PGVectorStore |
+| **Implement RAG Loaders** | Not Started | PDFLoader (PDFBox), DocxLoader (POI), WebLoader (JSoup) |
+| **Implement RAG Splitters** | Not Started | RecursiveCharacterSplitter, SemanticSplitter, TokenSplitter |
+| **Implement RAG Retrievers** | Not Started | VectorRetriever, BM25Retriever, HybridRetriever |
 
-### Medium Priority
-- [ ] **Implement StateGraph Execution**: Complete graph traversal logic
-- [ ] **Implement Agent Loops**: ReAct, Plan-and-Execute patterns
-- [ ] **Add Streaming Support**: SSE endpoints for token streaming
-- [ ] **Add Model Enums**: Type-safe model names per provider
+### Medium Priority (Agent & Streaming)
+| Task | Status | Details |
+|------|--------|---------|
+| **Implement ReAct Agent Loop** | Not Started | Think, Act, Observe cycle |
+| **Implement Plan-Execute Agent** | Not Started | Create plan, Execute steps |
+| **Implement Tool-Calling Agent** | Not Started | Structured output tool invocation |
+| **Add Streaming Endpoints** | Not Started | SSE controller for token streaming |
+| **Add Model Runtime Override** | Not Started | Request-time provider+model selection |
 
-### Lower Priority
-- [ ] **Add Redis Caching**: Cache embeddings and LLM responses
-- [ ] **Add Rate Limiting**: Bucket4j for API throttling
-- [ ] **Add Circuit Breaker**: Resilience4j for LLM failover
-- [ ] **Add Metrics**: Micrometer for observability
+### Lower Priority (Production Hardening)
+| Task | Status | Details |
+|------|--------|---------|
+| **Add Redis Caching** | Not Started | Cache embeddings and LLM responses |
+| **Add Rate Limiting** | Not Started | Bucket4j for API throttling |
+| **Add Circuit Breaker** | Not Started | Resilience4j for LLM failover |
+| **Add Metrics** | Not Started | Micrometer for observability |
+
+## Recommended Next Steps
+
+1. **LLM API Calls** - Foundation for everything
+   - Implement `GeminiChatStrategy.generate()` using Vertex AI / Gemini API
+   - Implement `OllamaChatStrategy.generate()` using Ollama REST API
+   - Test with simple prompts
+
+2. **Embedding APIs** - Required for RAG
+   - Implement embedding strategies to return actual vectors
+   - Test embedding generation
+
+3. **VectorStore Operations** - Required for RAG
+   - Implement `PGVectorStore.add()` and `similaritySearch()`
+   - Use pgvector's `<=>` cosine distance operator
+
+4. **RAG Pipeline** - Core feature
+   - Implement loaders, splitters, retrievers
+   - Wire together with VectorStore
+
+5. **Streaming & Agents** - Enhanced UX
+   - Add SSE endpoints
+   - Implement ReAct loop
 
 ## Getting Started
 

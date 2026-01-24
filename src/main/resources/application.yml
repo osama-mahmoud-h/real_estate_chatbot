@@ -52,7 +52,7 @@ llm:
       base-url: ${GEMINI_BASE_URL:https://generativelanguage.googleapis.com}
       models:
         # Chat Models
-        gemini-2.0-flash:
+        gemini-2.5-flash:
           type: chat
           context-window: 1048576
           max-output-tokens: 8192
@@ -228,6 +228,17 @@ jwt:
 # =============================================================================
 server:
   port: ${SERVER_PORT:8080}
+
+# =============================================================================
+# CHATBOT CONFIGURATION
+# =============================================================================
+chatbot:
+  debug: ${CHATBOT_DEBUG:false}
+  schema:
+    path: classpath:db/v1_real_estate_schema_ddl.sql
+  prompts:
+    path: classpath:prompts/
+    auto-load: true
 
 # =============================================================================
 # LOGGING

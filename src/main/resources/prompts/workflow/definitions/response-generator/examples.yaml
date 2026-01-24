@@ -1,0 +1,116 @@
+examples:
+  - description: Search with results
+    input:
+      user_query: "Find me apartments in Miami under $500k"
+      intent: SEARCH_PROPERTIES
+      result_count: 3
+      results:
+        - title: Modern Downtown Apartment
+          price: 450000
+          bedrooms: 2
+          city: Miami
+        - title: Brickell Bay Condo
+          price: 485000
+          bedrooms: 2
+          city: Miami
+        - title: Coral Gables Studio
+          price: 320000
+          bedrooms: 1
+          city: Miami
+    output: |
+      I found **3 apartments** in Miami under $500,000! Here are your options:
+
+      1. **Modern Downtown Apartment** - $450,000
+         - 2 bedrooms, 2 bathrooms
+         - 1,200 sqft in Downtown Miami
+
+      2. **Brickell Bay Condo** - $485,000
+         - 2 bedrooms, 2 bathrooms
+         - 1,100 sqft with ocean views
+
+      3. **Coral Gables Studio** - $320,000
+         - 1 bedroom, 1 bathroom
+         - 750 sqft, recently renovated
+
+      Would you like more details on any of these properties?
+
+  - description: Statistics response
+    input:
+      user_query: "What's the average house price in California?"
+      intent: GET_PROPERTY_STATS
+      result_count: 1
+      results:
+        avg_price: 875000
+        min_price: 250000
+        max_price: 5500000
+        total_count: 1247
+    output: |
+      Based on our current listings, here are the house price statistics for California:
+
+      - **Average Price:** $875,000
+      - **Price Range:** $250,000 - $5,500,000
+      - **Total Listings:** 1,247 houses
+
+      The California market shows significant variety. Would you like me to narrow down to a specific city or price range?
+
+  - description: No results found
+    input:
+      user_query: "Show me houses with pool in Alaska"
+      intent: SEARCH_PROPERTIES
+      result_count: 0
+      results: []
+    output: |
+      I couldn't find any houses with a pool in Alaska. Here are some suggestions:
+
+      - **Expand the location** - Would you like to search in other states?
+      - **Adjust features** - Would you consider properties without a pool?
+      - **Try other property types** - Would condos or townhouses work?
+
+      Let me know how you'd like to refine the search!
+
+  - description: Property details
+    input:
+      user_query: "Tell me about property 123"
+      intent: VIEW_PROPERTY_DETAILS
+      result_count: 1
+      results:
+        title: Luxury Beachfront Villa
+        price: 2500000
+        bedrooms: 5
+        bathrooms: 4
+        area_sqft: 4500
+        city: Malibu
+        state: California
+        features: [pool, ocean view, garage]
+        agent: John Smith
+    output: |
+      Here are the details for **Luxury Beachfront Villa**:
+
+      **Location:** Malibu, California
+      **Price:** $2,500,000
+      **Size:** 4,500 sqft | 5 bedrooms | 4 bathrooms
+
+      **Features:**
+      - Pool
+      - Ocean view
+      - Garage
+
+      **Listed by:** John Smith
+
+      Would you like to compare it with similar properties?
+
+  - description: Greeting response
+    input:
+      user_query: "Hi there!"
+      intent: GREETING
+      result_count: 0
+      results: null
+    output: |
+      Hello! Welcome! I'm your real estate assistant. I can help you:
+
+      - **Search properties** by location, price, bedrooms, and more
+      - **View property details** and features
+      - **Compare properties** side by side
+      - **Get market statistics** for different areas
+
+      What are you looking for today?

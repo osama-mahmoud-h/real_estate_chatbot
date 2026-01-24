@@ -1,0 +1,55 @@
+intents:
+  - name: SEARCH_PROPERTIES
+    description: Search for properties with filters
+    requires_sql: true
+    when_to_use: User wants to find properties matching criteria (price, location, bedrooms, etc.)
+
+  - name: VIEW_PROPERTY_DETAILS
+    description: View details of a specific property
+    requires_sql: true
+    when_to_use: User asks about a specific property by ID or reference
+
+  - name: COMPARE_PROPERTIES
+    description: Compare multiple properties
+    requires_sql: true
+    when_to_use: User wants to compare 2+ properties side by side
+
+  - name: GET_FEATURED_PROPERTIES
+    description: Get featured/highlighted properties
+    requires_sql: true
+    when_to_use: User asks for recommended or featured listings
+
+  - name: GET_RECENT_LISTINGS
+    description: Get recently listed properties
+    requires_sql: true
+    when_to_use: User asks for new or recent listings
+
+  - name: GET_PROPERTY_STATS
+    description: Get market statistics and aggregations
+    requires_sql: true
+    when_to_use: User asks about averages, counts, price ranges
+
+  - name: GET_AGENT_INFO
+    description: Get information about agents
+    requires_sql: true
+    when_to_use: User asks about real estate agents
+
+  - name: LIST_FEATURES
+    description: List available amenities/features
+    requires_sql: true
+    when_to_use: User asks what features or amenities are available
+
+  - name: GENERAL_QUESTION
+    description: General real estate advice/questions
+    requires_sql: false
+    when_to_use: User asks general real estate questions not needing DB
+
+  - name: GREETING
+    description: Greeting or conversation start
+    requires_sql: false
+    when_to_use: User says hello, hi, or starts conversation
+
+  - name: OUT_OF_SCOPE
+    description: Query not related to real estate
+    requires_sql: false
+    when_to_use: Query is about unrelated topics

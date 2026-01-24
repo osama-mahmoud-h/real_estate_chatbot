@@ -1,0 +1,126 @@
+examples:
+  - description: Property Search with multiple filters
+    input: "Find me 3-bedroom apartments in Miami under $500k"
+    output:
+      intent:
+        name: SEARCH_PROPERTIES
+        confidence: 0.97
+        requires_sql: true
+        reasoning: User wants to search with property type, location, bedroom, and price filters
+      entities:
+        property_type: apartment
+        location:
+          city: Miami
+        bedrooms:
+          exact: 3
+        price_range:
+          max: 500000
+          currency: USD
+      extracted_tokens:
+        - type: bedrooms
+          value: "3"
+          original_text: "3-bedroom"
+        - type: property_type
+          value: apartment
+          original_text: apartments
+        - type: location.city
+          value: Miami
+          original_text: Miami
+        - type: price_range.max
+          value: "500000"
+          original_text: "$500k"
+
+  - description: Statistics query
+    input: "What's the average price of houses in California?"
+    output:
+      intent:
+        name: GET_PROPERTY_STATS
+        confidence: 0.95
+        requires_sql: true
+        reasoning: User asking for aggregate price statistics
+      entities:
+        property_type: house
+        location:
+          state: California
+      extracted_tokens:
+        - type: property_type
+          value: house
+          original_text: houses
+        - type: location.state
+          value: California
+          original_text: California
+
+  - description: View specific property details
+    input: "Show me details for property 456"
+    output:
+      intent:
+        name: VIEW_PROPERTY_DETAILS
+        confidence: 0.98
+        requires_sql: true
+        reasoning: User requesting specific property details by ID
+      entities:
+        property_ids: [456]
+      extracted_tokens:
+        - type: property_ids
+          value: "456"
+          original_text: "property 456"
+
+  - description: Greeting
+    input: "Hello! Can you help me find a home?"
+    output:
+      intent:
+        name: GREETING
+        confidence: 0.99
+        requires_sql: false
+        reasoning: User greeting with intent to search
+      entities: {}
+
+  - description: Out of scope query
+    input: "What's the weather like today?"
+    output:
+      intent:
+        name: OUT_OF_SCOPE
+        confidence: 0.98
+        requires_sql: false
+        reasoning: Not related to real estate
+      entities: {}
+
+  - description: Complex search with range and features
+    input: "I need a 2-4 bedroom house for rent in New York with a pool, under $3000/month"
+    output:
+      intent:
+        name: SEARCH_PROPERTIES
+        confidence: 0.96
+        requires_sql: true
+        reasoning: Multi-filter property search with range, features, and listing type
+      entities:
+        property_type: house
+        listing_type: rent
+        location:
+          city: New York
+        bedrooms:
+          min: 2
+          max: 4
+        price_range:
+          max: 3000
+          currency: USD
+        features: [pool]
+      extracted_tokens:
+        - type: bedrooms
+          value: "2-4"
+          original_text: "2-4 bedroom"
+        - type: property_type
+          value: house
+          original_text: house
+        - type: listing_type
+          value: rent
+          original_text: "for rent"
+        - type: location.city
+          value: New York
+          original_text: New York
+        - type: features
+          value: pool
+          original_text: pool
+        - type: price_range.max
+          value: "3000"
+          original_text: "$3000/month"

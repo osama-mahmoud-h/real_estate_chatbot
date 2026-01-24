@@ -11,6 +11,8 @@ import semsem.chatbot.model.entity.Conversation;
 import semsem.chatbot.model.entity.Message;
 import semsem.chatbot.model.enums.ConversationStatus;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +23,7 @@ import java.util.UUID;
 public class ConversationMapper {
 
     private final MessageMapper messageMapper;
+    private final ObjectMapper objectMapper;
 
     public ConversationResponse toResponse(Conversation conversation) {
         if (conversation == null) {
@@ -33,7 +36,6 @@ public class ConversationMapper {
                 .status(conversation.getStatus())
                 .summary(conversation.getSummary())
                 .tokenCount(conversation.getTokenCount())
-                .metadata(conversation.getMetadata())
                 .createdAt(conversation.getCreatedAt())
                 .updatedAt(conversation.getUpdatedAt())
                 .build();
@@ -61,7 +63,6 @@ public class ConversationMapper {
                 .status(conversation.getStatus())
                 .summary(conversation.getSummary())
                 .tokenCount(conversation.getTokenCount())
-                .metadata(conversation.getMetadata())
                 .createdAt(conversation.getCreatedAt())
                 .updatedAt(conversation.getUpdatedAt())
                 .messageCount(messageCount)
@@ -81,7 +82,6 @@ public class ConversationMapper {
                 .status(conversation.getStatus())
                 .summary(conversation.getSummary())
                 .tokenCount(conversation.getTokenCount())
-                .metadata(conversation.getMetadata())
                 .createdAt(conversation.getCreatedAt())
                 .updatedAt(conversation.getUpdatedAt())
                 .messageCount(messageCount)
@@ -106,7 +106,6 @@ public class ConversationMapper {
                 .status(conversation.getStatus())
                 .summary(conversation.getSummary())
                 .tokenCount(conversation.getTokenCount())
-                .metadata(conversation.getMetadata())
                 .createdAt(conversation.getCreatedAt())
                 .updatedAt(conversation.getUpdatedAt())
                 .messageCount(messageCount)
@@ -115,15 +114,12 @@ public class ConversationMapper {
     }
 
     public Conversation toEntity(CreateConversationRequest request, AppUser user) {
-        String conversationId = generateConversationId();
         Instant now = Instant.now();
 
         return Conversation.builder()
-                .conversationId(conversationId)
                 .title(request.getTitle() != null ? request.getTitle() : "New Conversation")
                 .appUser(user)
                 .status(ConversationStatus.ACTIVE)
-                .metadata(request.getMetadata())
                 .tokenCount(0)
                 .messages(new ArrayList<>())
                 .createdAt(now)
@@ -138,13 +134,8 @@ public class ConversationMapper {
         if (request.getStatus() != null) {
             conversation.setStatus(request.getStatus());
         }
-        if (request.getMetadata() != null) {
-            conversation.setMetadata(request.getMetadata());
-        }
+
         conversation.setUpdatedAt(Instant.now());
     }
 
-    private String generateConversationId() {
-        return "conv_" + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
-    }
 }
