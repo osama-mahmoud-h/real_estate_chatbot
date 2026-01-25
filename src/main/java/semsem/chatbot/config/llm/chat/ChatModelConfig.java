@@ -1,7 +1,9 @@
 package semsem.chatbot.config.llm.chat;
 
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.experimental.SuperBuilder;
 import semsem.chatbot.config.llm.AbstractModelConfig;
 
 /**
@@ -10,6 +12,7 @@ import semsem.chatbot.config.llm.AbstractModelConfig;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
+@SuperBuilder
 public class ChatModelConfig extends AbstractModelConfig implements IChatModelConfig {
 
     /** Context window size in tokens */

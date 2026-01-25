@@ -2,6 +2,7 @@ package semsem.chatbot.config.llm.embedding;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.experimental.SuperBuilder;
 import semsem.chatbot.config.llm.AbstractModelConfig;
 
 /**
@@ -10,6 +11,7 @@ import semsem.chatbot.config.llm.AbstractModelConfig;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
+@SuperBuilder
 public class EmbeddingModelConfig extends AbstractModelConfig implements IEmbeddingModelConfig {
 
     /** Vector dimensions */

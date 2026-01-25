@@ -43,7 +43,7 @@ public class GeminiChatStrategy extends BaseChatLLMStrategy {
     }
 
     private ProviderConfig getProviderConfig() {
-        return llmProperties.getProviderOrThrow("gemini");
+        return llmProperties.getProviderOrThrow(LLMProvider.GEMINI);
     }
 
     private ChatModelConfig getModelConfig() {
@@ -167,10 +167,6 @@ public class GeminiChatStrategy extends BaseChatLLMStrategy {
         if (val instanceof Number) return ((Number) val).intValue();
         try { return Integer.parseInt(val.toString()); } catch (NumberFormatException e) { return defaultValue; }
     }
-
-    // =========================================================================
-    // INTERFACE IMPLEMENTATIONS
-    // =========================================================================
 
     @Override
     public String generate(String prompt, Map<String, Object> options) {
@@ -335,7 +331,7 @@ public class GeminiChatStrategy extends BaseChatLLMStrategy {
 
     @Override
     public boolean isAvailable() {
-        return llmProperties.getProvider("gemini")
+        return llmProperties.getProvider(LLMProvider.GEMINI)
                 .map(ProviderConfig::isAvailable)
                 .orElse(false);
     }

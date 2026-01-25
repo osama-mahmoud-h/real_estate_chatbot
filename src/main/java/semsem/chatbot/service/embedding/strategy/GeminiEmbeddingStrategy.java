@@ -7,6 +7,7 @@ import semsem.chatbot.config.LLMProperties;
 import semsem.chatbot.config.llm.embedding.EmbeddingModelConfig;
 import semsem.chatbot.config.llm.ProviderConfig;
 import semsem.chatbot.model.enums.EmbeddingProvider;
+import semsem.chatbot.model.enums.LLMProvider;
 
 import java.util.List;
 
@@ -22,7 +23,7 @@ public class GeminiEmbeddingStrategy extends BaseEmbeddingStrategy {
     private final LLMProperties llmProperties;
 
     private ProviderConfig getProviderConfig() {
-        return llmProperties.getProviderOrThrow("gemini");
+        return llmProperties.getProviderOrThrow(LLMProvider.GEMINI);
     }
 
     private EmbeddingModelConfig getModelConfig() {
@@ -66,7 +67,7 @@ public class GeminiEmbeddingStrategy extends BaseEmbeddingStrategy {
 
     @Override
     public boolean isAvailable() {
-        return llmProperties.getProvider("gemini")
+        return llmProperties.getProvider(LLMProvider.GEMINI)
                 .map(ProviderConfig::isAvailable)
                 .orElse(false);
     }

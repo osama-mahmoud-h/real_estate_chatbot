@@ -3,6 +3,7 @@ package semsem.chatbot.config.llm;
 import lombok.Data;
 import semsem.chatbot.config.llm.chat.ChatModelConfig;
 import semsem.chatbot.config.llm.embedding.EmbeddingModelConfig;
+import semsem.chatbot.model.enums.ModelType;
 
 import java.util.HashMap;
 import java.util.List;
@@ -93,30 +94,46 @@ public abstract class AbstractProviderConfig implements IProviderConfig {
 
         String type = getStringValue(raw, "type", "chat");
 
-        if ("embedding".equalsIgnoreCase(type)) {
+        if (ModelType.EMBEDDING.toString().toLowerCase().equalsIgnoreCase(type)) {
             return createEmbeddingModelConfig(raw);
-        } else {
+        } else if(ModelType.CHAT.toString().toLowerCase().equalsIgnoreCase(type)) {
             return createChatModelConfig(raw);
         }
+        throw new IllegalArgumentException("Unknown model type: " + type);
     }
 
     private ChatModelConfig createChatModelConfig(Map<String, Object> raw) {
-        ChatModelConfig config = new ChatModelConfig();
-        config.setType(getStringValue(raw, "type", "chat"));
-        config.setContextWindow(getIntValue(raw, "contextWindow", 0));
-        config.setMaxOutputTokens(getIntValue(raw, "maxOutputTokens", 0));
-        config.setCapabilities(getListValue(raw, "capabilities"));
-        config.setProperties(getMapValue(raw, "properties"));
+
+        String type = getStringValue(raw, "type", ModelType.CHAT.toString().toLowerCase());
+        if (! ModelType.CHAT.toString().toLowerCase().equalsIgnoreCase(type)) {
+            throw new IllegalArgumentException("Model type mismatch: expected chat model, got embedding");
+        }
+
+        ChatModelConfig config = ChatModelConfig.builder()
+                        .type(ModelType.CHAT)
+                        .contextWindow(getIntValue(raw, "contextWindow", 0))
+                        .maxOutputTokens(getIntValue(raw, "maxOutputTokens", 0))
+                        .capabilities(getListValue(raw, "capabilities"))
+                        .properties(getMapValue(raw, "properties"))
+                        .build();
+
         return config;
     }
 
     private EmbeddingModelConfig createEmbeddingModelConfig(Map<String, Object> raw) {
-        EmbeddingModelConfig config = new EmbeddingModelConfig();
-        config.setType(getStringValue(raw, "type", "embedding"));
-        config.setDimensions(getIntValue(raw, "dimensions", 0));
-        config.setMaxInputTokens(getIntValue(raw, "maxInputTokens", 0));
-        config.setCapabilities(getListValue(raw, "capabilities"));
-        config.setProperties(getMapValue(raw, "properties"));
+        String type = getStringValue(raw, "type", ModelType.EMBEDDING.toString().toLowerCase());
+        if (! ModelType.EMBEDDING.toString().toLowerCase().equalsIgnoreCase(type)) {
+            throw new IllegalArgumentException("Model type mismatch: expected embedding model, got chat");
+        }
+
+        EmbeddingModelConfig config = EmbeddingModelConfig.builder()
+                        .type(ModelType.EMBEDDING)
+                        .dimensions(getIntValue(raw, "dimensions", 0))
+                        .maxInputTokens(getIntValue(raw, "maxInputTokens", 0))
+                        .capabilities(getListValue(raw, "capabilities"))
+                        .properties(getMapValue(raw, "properties"))
+                        .build();
+
         return config;
     }
 

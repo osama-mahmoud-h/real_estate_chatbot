@@ -2,6 +2,7 @@ package semsem.chatbot.config.llm.chat;
 
 import lombok.Data;
 import semsem.chatbot.config.llm.ISelection;
+import semsem.chatbot.model.enums.LLMProvider;
 
 /**
  * Chat model selection configuration.
@@ -12,7 +13,7 @@ import semsem.chatbot.config.llm.ISelection;
 public class ChatSelection implements ISelection {
 
     /** Provider name: gemini | cohere | ollama */
-    private String provider = "ollama";
+    private LLMProvider provider = LLMProvider.OLLAMA;
 
     /** Model name from the chosen provider */
     private String model = "llama3.2";
