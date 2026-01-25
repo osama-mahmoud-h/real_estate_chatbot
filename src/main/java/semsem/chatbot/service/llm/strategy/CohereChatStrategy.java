@@ -25,7 +25,7 @@ public class CohereChatStrategy extends BaseChatLLMStrategy {
     private final LLMProperties llmProperties;
 
     private ProviderConfig getProviderConfig() {
-        return llmProperties.getProviderOrThrow("cohere");
+        return llmProperties.getProviderOrThrow(LLMProvider.COHERE);
     }
 
     private ChatModelConfig getModelConfig() {
@@ -81,7 +81,7 @@ public class CohereChatStrategy extends BaseChatLLMStrategy {
 
     @Override
     public boolean isAvailable() {
-        return llmProperties.getProvider("cohere")
+        return llmProperties.getProvider(LLMProvider.COHERE)
                 .map(ProviderConfig::isAvailable)
                 .orElse(false);
     }

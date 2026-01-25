@@ -55,7 +55,7 @@ public class ChatLLMFactory {
      * Get the default configured strategy based on AIProperties.chat.provider.
      */
     public ChatLLMStrategy getDefaultStrategy() {
-        String configuredProvider = llmProperties.getChat().getProvider();
+        LLMProvider configuredProvider = llmProperties.getChat().getProvider();
         return getStrategy(configuredProvider);
     }
 

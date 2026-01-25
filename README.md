@@ -95,6 +95,7 @@ graph TD
 | Document Parsing | Apache PDFBox, Apache POI, JSoup |
 | API Docs | SpringDoc OpenAPI 2.1.0 |
 | Build | Maven |
+| Containerization | Docker, Docker Compose |
 
 ## Project Structure
 
@@ -373,7 +374,7 @@ AI_EMBEDDING_MODEL=nomic-embed-text
 JWT_SECRET=your_base64_encoded_secret
 ```
 
-### Build & Run
+### Build & Run (Local)
 
 ```bash
 # Build
@@ -385,6 +386,82 @@ JWT_SECRET=your_base64_encoded_secret
 # Test
 ./mvnw test
 ```
+
+### Docker Deployment
+
+Deploy the full stack with Docker Compose (PostgreSQL + pgvector, Redis, App).
+
+#### Prerequisites
+
+1. Docker & Docker Compose installed
+2. API keys for cloud providers:
+   - `GOOGLE_AI_API_KEY` - Google Gemini (for chat)
+   - `COHERE_API_KEY` - Cohere (for embeddings)
+
+#### Quick Start
+
+```bash
+# 1. Create .env file with your API keys
+cp .env.example .env
+# Edit .env and add your GOOGLE_AI_API_KEY and COHERE_API_KEY
+
+# 2. Build and start
+docker compose build
+docker compose up -d
+
+# 3. View logs
+docker compose logs -f app
+
+# 4. Stop
+docker compose down
+```
+
+#### Using Make (Optional)
+
+```bash
+make build      # Build images
+make up         # Start services
+make down       # Stop services
+make logs       # View all logs
+make logs-app   # View app logs only
+make clean      # Remove containers, volumes, images
+```
+
+#### Services
+
+| Service | Port | Description |
+|---------|------|-------------|
+| app | 8080 | Spring Boot application |
+| postgres | 5432 | PostgreSQL with pgvector |
+| redis | 6379 | Redis cache |
+
+#### Docker DNS Troubleshooting
+
+If build fails with "Temporary failure in name resolution":
+
+```bash
+# Add DNS to Docker daemon
+echo '{"dns": ["8.8.8.8", "1.1.1.1"]}' | sudo tee /etc/docker/daemon.json
+
+# Restart Docker
+sudo systemctl restart docker
+
+# Rebuild
+docker compose build
+```
+
+#### Environment Variables (Docker)
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `GOOGLE_AI_API_KEY` | - | Google Gemini API key (required) |
+| `COHERE_API_KEY` | - | Cohere API key (required) |
+| `AI_CHAT_PROVIDER` | gemini | Chat provider |
+| `AI_CHAT_MODEL` | gemini-2.5-flash | Chat model |
+| `AI_EMBEDDING_PROVIDER` | cohere | Embedding provider |
+| `AI_EMBEDDING_MODEL` | embed-multilingual-v3.0 | Embedding model |
+| `DATABASE_PASSWORD` | postgres | Database password |
+| `JWT_SECRET` | (default) | JWT signing key |
 
 ### API Endpoints
 

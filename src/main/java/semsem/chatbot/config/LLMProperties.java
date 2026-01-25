@@ -11,6 +11,7 @@ import semsem.chatbot.config.llm.chat.IChatModelConfig;
 import semsem.chatbot.config.llm.embedding.IEmbeddingModelConfig;
 import semsem.chatbot.config.llm.IProviderConfig;
 import semsem.chatbot.config.llm.ProviderConfig;
+import semsem.chatbot.model.enums.LLMProvider;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,17 +33,17 @@ public class LLMProperties {
     private EmbeddingSelection embedding = new EmbeddingSelection();
 
     /** Provider configurations with models */
-    private Map<String, ProviderConfig> providers = new HashMap<>();
+    private Map<LLMProvider, ProviderConfig> providers = new HashMap<>();
 
     // =========================================================================
     // PROVIDER ACCESS
     // =========================================================================
 
-    public Optional<ProviderConfig> getProvider(String name) {
+    public Optional<ProviderConfig> getProvider(LLMProvider name) {
         return Optional.ofNullable(providers.get(name));
     }
 
-    public ProviderConfig getProviderOrThrow(String name) {
+    public ProviderConfig getProviderOrThrow(LLMProvider name) {
         return getProvider(name)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Provider not found: " + name));

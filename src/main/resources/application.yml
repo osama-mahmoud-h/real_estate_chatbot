@@ -5,7 +5,7 @@ spring:
     name: real-estate-chatbot
 
   profiles:
-    active: ${SPRING_PROFILE:dev}
+    active: ${SPRING_PROFILES_ACTIVE:dev}
 
   datasource:
     url: jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:5432}/${DATABASE_NAME:chatbot_db}

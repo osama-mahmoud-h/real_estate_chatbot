@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import semsem.chatbot.config.LLMProperties;
 import semsem.chatbot.model.enums.EmbeddingProvider;
+import semsem.chatbot.model.enums.LLMProvider;
 
 import java.util.EnumMap;
 import java.util.List;
@@ -55,8 +56,8 @@ public class EmbeddingFactory {
      * Get the default configured strategy based on AIProperties.embedding.provider.
      */
     public EmbeddingStrategy getDefaultStrategy() {
-        String configuredProvider = llmProperties.getEmbedding().getProvider();
-        return getStrategy(configuredProvider);
+        LLMProvider configuredProvider = llmProperties.getEmbedding().getProvider();
+        return getStrategy(String.valueOf(configuredProvider));
     }
 
     /**

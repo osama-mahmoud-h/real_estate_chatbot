@@ -1,0 +1,83 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      network: host
+    container_name: real-estate-chatbot
+    ports:
+      - "8080:8080"
+    environment:
+      # Database
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: ${DATABASE_NAME:-chatbot_db}
+      DATABASE_USERNAME: ${DATABASE_USERNAME:-postgres}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+
+      # AI Provider Credentials (required)
+      GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY}
+      COHERE_API_KEY: ${COHERE_API_KEY}
+
+      # AI Model Selection (cloud providers)
+      AI_CHAT_PROVIDER: ${AI_CHAT_PROVIDER:-gemini}
+      AI_CHAT_MODEL: ${AI_CHAT_MODEL:-gemini-2.5-flash}
+      AI_EMBEDDING_PROVIDER: ${AI_EMBEDDING_PROVIDER:-cohere}
+      AI_EMBEDDING_MODEL: ${AI_EMBEDDING_MODEL:-embed-multilingual-v3.0}
+
+      # JWT
+      JWT_SECRET: ${JWT_SECRET:-Y2hhbmdlLXRoaXMtaW4tcHJvZHVjdGlvbi1wbGVhc2U=}
+
+      # Spring profiles
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - chatbot-network
+    restart: unless-stopped
+
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: chatbot-postgres
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME:-chatbot_db}
+      POSTGRES_USER: ${DATABASE_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USERNAME:-postgres} -d ${DATABASE_NAME:-chatbot_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - chatbot-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: chatbot-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - chatbot-network
+    restart: unless-stopped
+
+networks:
+  chatbot-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:

@@ -25,7 +25,7 @@ public class OllamaChatStrategy extends BaseChatLLMStrategy {
     private final LLMProperties llmProperties;
 
     private ProviderConfig getProviderConfig() {
-        return llmProperties.getProviderOrThrow("ollama");
+        return llmProperties.getProviderOrThrow(LLMProvider.OLLAMA);
     }
 
     private ChatModelConfig getModelConfig() {
@@ -81,7 +81,7 @@ public class OllamaChatStrategy extends BaseChatLLMStrategy {
 
     @Override
     public boolean isAvailable() {
-        return llmProperties.getProvider("ollama")
+        return llmProperties.getProvider(LLMProvider.OLLAMA)
                 .map(ProviderConfig::isAvailable)
                 .orElse(false);
     }

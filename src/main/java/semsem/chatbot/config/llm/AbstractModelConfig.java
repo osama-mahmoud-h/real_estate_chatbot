@@ -1,6 +1,9 @@
 package semsem.chatbot.config.llm;
 
+import lombok.Builder;
 import lombok.Data;
+import lombok.experimental.SuperBuilder;
+import semsem.chatbot.model.enums.ModelType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,10 +16,11 @@ import java.util.Map;
  * Subclasses (ChatModelConfig, EmbeddingModelConfig) add model-specific properties.
  */
 @Data
+@SuperBuilder
 public abstract class AbstractModelConfig implements IModelConfig {
 
     /** Model type identifier */
-    protected String type;
+    protected ModelType type;
 
     /** Model capabilities (stored as strings for YAML binding compatibility) */
     protected List<String> capabilities = new ArrayList<>();

@@ -1,5 +1,7 @@
 package semsem.chatbot.config.llm;
 
+import semsem.chatbot.model.enums.ModelType;
+
 /**
  * Base interface for all model configurations.
  * Provides capability checking methods for type-safe model validation.
@@ -9,7 +11,7 @@ public interface IModelConfig {
     /**
      * Get the model type identifier (e.g., "chat", "embedding").
      */
-    String getType();
+    ModelType getType();
 
     /**
      * Check if the model has a specific capability.
