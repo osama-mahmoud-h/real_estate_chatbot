@@ -235,7 +235,25 @@ server:
 chatbot:
   debug: ${CHATBOT_DEBUG:false}
   schema:
+    # Static file path (fallback when dynamic loading is disabled)
     path: classpath:db/v1_real_estate_schema_ddl.sql
+    # Dynamic schema loading configuration
+    datasource:
+      # Set to true when any database-specific config is enabled
+      active: ${SCHEMA_DATASOURCE_ACTIVE:false}
+      # PostgreSQL configuration
+      postgres:
+        enabled: ${SCHEMA_POSTGRES_ENABLED:false}
+        url: ${SCHEMA_POSTGRES_URL:}
+        username: ${SCHEMA_POSTGRES_USERNAME:}
+        password: ${SCHEMA_POSTGRES_PASSWORD:}
+        schema: ${SCHEMA_POSTGRES_SCHEMA:public}
+        include-tables: ${SCHEMA_POSTGRES_INCLUDE_TABLES:}
+        exclude-tables: ${SCHEMA_POSTGRES_EXCLUDE_TABLES:}
+        include-comments: ${SCHEMA_POSTGRES_INCLUDE_COMMENTS:true}
+        include-relationships: ${SCHEMA_POSTGRES_INCLUDE_RELATIONSHIPS:true}
+        cache-ttl-seconds: ${SCHEMA_CACHE_TTL:3600}
+        pool-size: ${SCHEMA_POOL_SIZE:2}
   prompts:
     path: classpath:prompts/
     auto-load: true
