@@ -3,12 +3,14 @@ package semsem.chatbot.service.sql;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
+import semsem.chatbot.config.SchemaDataSourceConfig;
+import semsem.chatbot.config.SchemaDataSourceProperties;
 import semsem.chatbot.orchestration.graph.output.QueryAnalyzerOutput;
 import semsem.chatbot.orchestration.graph.output.SqlGeneratorOutput;
 import semsem.chatbot.prompt.PromptTemplate;
@@ -16,19 +18,22 @@ import semsem.chatbot.prompt.loader.PromptDefinition;
 import semsem.chatbot.prompt.loader.PromptDefinitionsLoader;
 import semsem.chatbot.prompt.loader.PromptRegistry;
 import semsem.chatbot.service.llm.LLMService;
+import semsem.chatbot.service.schema.SchemaMetadataExtractor;
+import semsem.chatbot.service.schema.model.SchemaMetadata;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 
 /**
  * Default implementation of SqlGeneratorService.
  * Uses LLM with sql-generator prompt and dynamically loaded schema.
+ * Supports both static file and dynamic database schema loading.
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class DefaultSqlGeneratorService implements SqlGeneratorService {
 
     private final LLMService llmService;
@@ -37,12 +42,32 @@ public class DefaultSqlGeneratorService implements SqlGeneratorService {
     private final ObjectMapper objectMapper;
     private final ResourceLoader resourceLoader;
 
+    @Autowired(required = false)
+    private SchemaMetadataExtractor schemaExtractor;
+
+    @Autowired(required = false)
+    private SchemaDataSourceConfig schemaDataSourceConfig;
+
     @Value("${chatbot.schema.path:classpath:db/v1_real_estate_schema_ddl.sql}")
     private String schemaPath;
 
     private static final String PROMPT_NAME = "sql-generator";
 
     private String cachedSchema;
+    private SchemaMetadata cachedSchemaMetadata;
+    private Instant cacheExpiry;
+
+    public DefaultSqlGeneratorService(LLMService llmService,
+                                       PromptRegistry promptRegistry,
+                                       PromptDefinitionsLoader definitionsLoader,
+                                       ObjectMapper objectMapper,
+                                       ResourceLoader resourceLoader) {
+        this.llmService = llmService;
+        this.promptRegistry = promptRegistry;
+        this.definitionsLoader = definitionsLoader;
+        this.objectMapper = objectMapper;
+        this.resourceLoader = resourceLoader;
+    }
 
     @PostConstruct
     public void init() {
@@ -88,17 +113,67 @@ public class DefaultSqlGeneratorService implements SqlGeneratorService {
 
     @Override
     public String getSchemaDescription() {
+        refreshSchemaIfNeeded();
         return cachedSchema;
     }
 
     private void loadSchema() {
+        if (isDynamicSchemaEnabled()) {
+            loadSchemaFromDatabase();
+        } else {
+            loadSchemaFromFile();
+        }
+    }
+
+    private boolean isDynamicSchemaEnabled() {
+        return schemaExtractor != null && schemaDataSourceConfig != null
+                && schemaDataSourceConfig.getActiveProperties().isPresent();
+    }
+
+    private void loadSchemaFromDatabase() {
+        try {
+            SchemaDataSourceProperties props = schemaDataSourceConfig.getActiveProperties()
+                    .orElseThrow(() -> new IllegalStateException("No active schema datasource"));
+
+            log.info("Loading schema dynamically from database: type={}, schema={}",
+                    props.getType().getDisplayName(),
+                    props.getEffectiveSchema());
+
+            cachedSchemaMetadata = schemaExtractor.extract(props);
+            cachedSchema = cachedSchemaMetadata.toLLMDescription();
+
+            // Set cache expiry
+            long ttl = props.getCacheTtlSeconds();
+            cacheExpiry = ttl > 0 ? Instant.now().plusSeconds(ttl) : null;
+
+            log.info("Loaded {} tables from database, cache TTL: {}s",
+                    cachedSchemaMetadata.getTables().size(),
+                    ttl);
+
+        } catch (Exception e) {
+            log.error("Failed to load schema from database, falling back to file: {}",
+                    e.getMessage());
+            loadSchemaFromFile();
+        }
+    }
+
+    private void loadSchemaFromFile() {
         try {
             Resource resource = resourceLoader.getResource(schemaPath);
             cachedSchema = resource.getContentAsString(StandardCharsets.UTF_8);
-            log.info("Loaded database schema from: {}", schemaPath);
+            cachedSchemaMetadata = null;
+            cacheExpiry = null;
+            log.info("Loaded database schema from file: {}", schemaPath);
         } catch (IOException e) {
             log.error("Failed to load schema from {}: {}", schemaPath, e.getMessage());
             cachedSchema = "Schema not available";
+        }
+    }
+
+    private void refreshSchemaIfNeeded() {
+        if (isDynamicSchemaEnabled() && cacheExpiry != null && Instant.now().isAfter(cacheExpiry)) {
+            log.debug("Schema cache expired, refreshing...");
+            loadSchemaFromDatabase();
         }
     }
 
