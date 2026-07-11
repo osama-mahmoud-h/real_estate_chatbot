@@ -33,5 +33,5 @@ build/
 .vscode/
 
 ### ENV Files at any levels ###
-.env
+backend/.env
 **/.env
