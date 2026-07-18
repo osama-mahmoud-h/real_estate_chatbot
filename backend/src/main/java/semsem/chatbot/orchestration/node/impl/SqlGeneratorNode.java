@@ -2,54 +2,36 @@ package semsem.chatbot.orchestration.node.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.bsc.langgraph4j.action.NodeAction;
 import org.springframework.stereotype.Component;
-import semsem.chatbot.model.enums.GraphNodeNames;
-import semsem.chatbot.orchestration.graph.ChatGraphState;
+import semsem.chatbot.orchestration.graph.ChatState;
 import semsem.chatbot.orchestration.graph.output.QueryAnalyzerOutput;
 import semsem.chatbot.orchestration.graph.output.SqlGeneratorOutput;
-import semsem.chatbot.orchestration.node.GraphNode;
 import semsem.chatbot.service.sql.SqlGeneratorService;
 
+import java.util.Map;
 import java.util.Optional;
 
-/**
- * SQL Generator Node - Generates safe, read-only SQL queries.
- * Delegates to SqlGeneratorService for the actual logic.
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class SqlGeneratorNode implements GraphNode<ChatGraphState> {
+public class SqlGeneratorNode implements NodeAction<ChatState> {
 
     private final SqlGeneratorService sqlGeneratorService;
 
     @Override
-    public GraphNodeNames getName() {
-        return GraphNodeNames.SQL_GENERATOR;
+    public Map<String, Object> apply(ChatState state) {
+        SqlGeneratorOutput output = Optional.ofNullable(state.analysis())
+                .map(analysis -> sqlGeneratorService.generate(
+                        analysis.getIntent(), analysis.getEntities(), state.userQuery()))
+                .orElseGet(this::skipped);
+        return Map.of(ChatState.Keys.SQL_GENERATION, output);
     }
 
-    @Override
-    public ChatGraphState execute(ChatGraphState state) {
-        log.debug("Executing SqlGeneratorNode");
-
-        QueryAnalyzerOutput entityOutput = state.getEntityExtractorOutput();
-
-        SqlGeneratorOutput output = Optional.ofNullable(entityOutput)
-                .map(eo -> sqlGeneratorService.generate(
-                        eo.getIntent(),
-                        eo.getEntities(),
-                        state.getUserQuery()))
-                .orElseGet(this::createSkippedOutput);
-
-        state.setSqlGeneratorOutput(output);
-
-        return state;
-    }
-
-    private SqlGeneratorOutput createSkippedOutput() {
+    private SqlGeneratorOutput skipped() {
         return SqlGeneratorOutput.builder()
                 .isSafe(true)
-                .explanation("Skipped: No entity extraction output available")
+                .explanation("Skipped: No analysis output available")
                 .build();
     }
 }

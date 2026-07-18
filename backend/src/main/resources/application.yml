@@ -1,6 +1,6 @@
 spring:
   config:
-    import: optional:file:.env[.properties]
+    import: optional:file:./backend/.env[.properties]
   application:
     name: real-estate-chatbot
 
@@ -21,6 +21,28 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+
+  # Active ChatModel: openai (Cohere via its OpenAI-compatible endpoint) | google-genai
+  ai:
+    model:
+      chat: ${AI_SPRING_CHAT:openai}
+      embedding: none
+    openai:
+      api-key: ${AI_API_KEY:}
+      base-url: ${AI_BASE_URL:https://api.cohere.ai/compatibility}
+      chat:
+        options:
+          model: ${AI_CHAT_MODEL:command-a-03-2025}
+          temperature: ${AI_CHAT_TEMPERATURE:0.0}
+          max-tokens: ${AI_CHAT_MAX_TOKENS:8192}
+    google:
+      genai:
+        api-key: ${GOOGLE_AI_API_KEY:}
+        chat:
+          model: ${GEMINI_CHAT_MODEL:gemini-2.5-flash}
+          temperature: ${AI_CHAT_TEMPERATURE:0.0}
+          max-output-tokens: ${AI_CHAT_MAX_TOKENS:8192}
+          top-p: ${AI_CHAT_TOP_P:0.95}
 
 # =============================================================================
 # AI CONFIGURATION (LLM Independent Architecture)

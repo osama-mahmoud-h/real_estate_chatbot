@@ -9,21 +9,23 @@ import semsem.chatbot.model.dto.request.ChatRequestDto;
 import semsem.chatbot.model.dto.request.CreateMessageRequest;
 import semsem.chatbot.model.dto.response.ChatResponseDto;
 import semsem.chatbot.model.enums.MessageRole;
-import semsem.chatbot.orchestration.graph.ChatGraphState;
+import semsem.chatbot.orchestration.graph.ChatMessage;
+import semsem.chatbot.orchestration.graph.ChatState;
 import semsem.chatbot.orchestration.graph.output.QueryAnalyzerOutput;
-import semsem.chatbot.orchestration.workflow.ChatWorkflow;
+import semsem.chatbot.orchestration.workflow.GraphOrchestrator;
 import semsem.chatbot.service.chat.LLMChattingService;
 import semsem.chatbot.service.chat.MessageService;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
 public class LLMChattingServiceImpl implements LLMChattingService {
 
-    private final ChatWorkflow chatWorkflow;
+    private final GraphOrchestrator<ChatState> chatGraph;
     private final MessageService messageService;
 
     @Value("${chatbot.debug:false}")
@@ -41,16 +43,17 @@ public class LLMChattingServiceImpl implements LLMChattingService {
             // Persist the user's message before running the workflow.
             persistMessage(conversationId, MessageRole.USER, request.getMessage(), null);
 
-            // Create initial state
-            ChatGraphState initialState = ChatGraphState.fromQuery(conversationId, request.getMessage());
+            Map<String, Object> input = Map.of(
+                    ChatState.Keys.CONVERSATION_ID, conversationId,
+                    ChatState.Keys.USER_QUERY, request.getMessage(),
+                    ChatState.Keys.MESSAGES, List.of(ChatMessage.user(request.getMessage())));
 
-            // Execute workflow
             long startedAt = System.currentTimeMillis();
-            ChatGraphState resultState = chatWorkflow.execute(initialState);
+            ChatState resultState = chatGraph.run(input, String.valueOf(conversationId));
             long latencyMs = System.currentTimeMillis() - startedAt;
 
             // Persist the assistant's reply so the conversation history reloads.
-            persistMessage(conversationId, MessageRole.ASSISTANT, resultState.getResponse(), latencyMs);
+            persistMessage(conversationId, MessageRole.ASSISTANT, resultState.response(), latencyMs);
 
             // Build response
             return buildResponse(resultState, conversationId);
@@ -83,14 +86,14 @@ public class LLMChattingServiceImpl implements LLMChattingService {
         }
     }
 
-    private ChatResponseDto buildResponse(ChatGraphState state, Long conversationId) {
+    private ChatResponseDto buildResponse(ChatState state, Long conversationId) {
         try {
             ChatResponseDto.ChatResponseDtoBuilder builder = ChatResponseDto.builder()
-                    .message(state.getResponse())
+                    .message(state.response())
                     .conversationId(conversationId);
 
             // Add intent info
-            Optional.ofNullable(state.getEntityExtractorOutput())
+            Optional.ofNullable(state.analysis())
                     .map(QueryAnalyzerOutput::getIntent)
                     .ifPresent(intent -> {
                         builder.intent(intent.getName());
@@ -98,7 +101,7 @@ public class LLMChattingServiceImpl implements LLMChattingService {
                     });
 
             // Add result info
-            Optional.ofNullable(state.getSqlExecutorOutput())
+            Optional.ofNullable(state.sqlExecution())
                     .ifPresent(sqlOutput -> {
                         builder.resultCount(sqlOutput.getRowCount());
                         builder.executionTimeMs(sqlOutput.getExecutionTimeMs());
@@ -121,20 +124,17 @@ public class LLMChattingServiceImpl implements LLMChattingService {
         }
     }
 
-    private ChatResponseDto.DebugInfo buildDebugInfo(ChatGraphState state) {
+    private ChatResponseDto.DebugInfo buildDebugInfo(ChatState state) {
         try {
             ChatResponseDto.DebugInfo.DebugInfoBuilder debug = ChatResponseDto.DebugInfo.builder();
 
-            Optional.ofNullable(state.getSqlGeneratorOutput())
+            Optional.ofNullable(state.sqlGeneration())
                     .ifPresent(sql -> {
                         debug.generatedSql(sql.getGeneratedSql());
                         debug.sqlParameters(sql.getParameters());
                     });
 
-            Optional.ofNullable(state.getLanguageDetectorOutput())
-                    .ifPresent(lang -> debug.detectedLanguage(lang.getDetectedLanguage()));
-
-            Optional.ofNullable(state.getEntityExtractorOutput())
+            Optional.ofNullable(state.analysis())
                     .map(QueryAnalyzerOutput::getEntities)
                     .ifPresent(debug::extractedEntities);
 

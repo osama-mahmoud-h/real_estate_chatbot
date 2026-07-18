@@ -2,46 +2,32 @@ package semsem.chatbot.orchestration.node.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.bsc.langgraph4j.action.NodeAction;
 import org.springframework.stereotype.Component;
-import semsem.chatbot.model.enums.GraphNodeNames;
-import semsem.chatbot.orchestration.graph.ChatGraphState;
+import semsem.chatbot.orchestration.graph.ChatState;
 import semsem.chatbot.orchestration.graph.output.SqlExecutorOutput;
-import semsem.chatbot.orchestration.node.GraphNode;
 import semsem.chatbot.service.sql.SqlExecutorService;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 
-/**
- * SQL Executor Node - Executes safe, read-only SQL queries.
- * Delegates to SqlExecutorService for the actual logic.
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class SqlExecutorNode implements GraphNode<ChatGraphState> {
+public class SqlExecutorNode implements NodeAction<ChatState> {
 
     private final SqlExecutorService sqlExecutorService;
 
     @Override
-    public GraphNodeNames getName() {
-        return GraphNodeNames.SQL_EXECUTOR;
-    }
-
-    @Override
-    public ChatGraphState execute(ChatGraphState state) {
-        log.debug("Executing SqlExecutorNode");
-
-        SqlExecutorOutput output = Optional.ofNullable(state.getSqlGeneratorOutput())
+    public Map<String, Object> apply(ChatState state) {
+        SqlExecutorOutput output = Optional.ofNullable(state.sqlGeneration())
                 .map(sqlExecutorService::execute)
-                .orElseGet(this::createSkippedOutput);
-
-        state.setSqlExecutorOutput(output);
-
-        return state;
+                .orElseGet(this::skipped);
+        return Map.of(ChatState.Keys.SQL_EXECUTION, output);
     }
 
-    private SqlExecutorOutput createSkippedOutput() {
+    private SqlExecutorOutput skipped() {
         return SqlExecutorOutput.builder()
                 .results(Collections.emptyList())
                 .rowCount(0)

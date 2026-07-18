@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 import semsem.chatbot.model.enums.MessageRole;
 
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.Map;
 
@@ -13,7 +14,7 @@ import java.util.Map;
  */
 @Data
 @Builder
-public class ChatMessage {
+public class ChatMessage implements Serializable {
 
     private MessageRole role;
     private String content;

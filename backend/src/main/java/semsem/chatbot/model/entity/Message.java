@@ -4,8 +4,10 @@ package semsem.chatbot.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.type.SqlTypes;
 import semsem.chatbot.model.enums.MessageRole;
 
 import java.time.Instant;
@@ -63,6 +65,7 @@ public class Message {
     @Column(name = "parent_message_id")
     private Long parentMessageId;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "metadata", columnDefinition = "jsonb")
     private String metadata; // Store tool calls, function calls, etc.
 

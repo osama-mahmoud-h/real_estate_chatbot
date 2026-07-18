@@ -3,7 +3,7 @@
 - Not Ready for Production Use
 
 LLM-powered chatbot for real estate applications built with **Spring Boot 3.5**, **Spring AI 1.1.2**, and a **LangGraph-style architecture**. Features RAG (Retrieval-Augmented Generation), autonomous agents, composable chains, and multi-provider LLM support.
-![Real-Estat Chat Bot](images/property_chat_bot_img.png)
+![Real-Estat Chat Bot](images/conversation_chat.png)
 ## Features
 
 - **LangGraph-style Orchestration**: State-based workflow graphs with conditional routing

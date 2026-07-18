@@ -1,5 +1,6 @@
 import { cn } from '@/shared/lib/cn';
 import { formatTime } from '@/shared/lib/formatTime';
+import { Markdown } from '@/shared/ui/Markdown';
 import { isUserRole } from '../../domain/MessageRole';
 import type { Message } from '../../domain/Message';
 
@@ -23,13 +24,13 @@ export function MessageBubble({ message }: { message: Message }) {
         <div className={cn('flex flex-col gap-1', isUser ? 'items-end' : 'items-start')}>
           <div
             className={cn(
-              'whitespace-pre-wrap break-words rounded-2xl px-4 py-2.5 text-sm leading-relaxed',
+              'break-words rounded-2xl px-4 py-2.5 text-sm leading-relaxed',
               isUser
-                ? 'rounded-br-md bg-brand-gradient text-white shadow-lift'
+                ? 'whitespace-pre-wrap rounded-br-md bg-brand-gradient text-white shadow-lift'
                 : 'rounded-bl-md border border-slate-200/80 bg-white text-slate-800 shadow-soft dark:border-white/10 dark:bg-ink-800 dark:text-slate-100',
             )}
           >
-            {message.content}
+            {isUser ? message.content : <Markdown>{message.content}</Markdown>}
           </div>
           {time && (
             <span className="px-1 text-[11px] text-slate-400 dark:text-slate-500">{time}</span>

@@ -38,8 +38,42 @@ entities:
 
   - name: features
     type: array
-    description: Desired amenities
-    possible_values: [pool, garage, garden, gym, parking, elevator, balcony, fireplace]
+    description: >
+      Desired amenities. Map each user term to the EXACT feature name below
+      (e.g. "pool" or "private pool" -> "Swimming Pool"; "garage" -> "Parking Garage";
+      "golf view" -> "Golf Course View"). Only emit values from this list.
+    possible_values:
+      - Hardwood Floors
+      - Granite Countertops
+      - Walk-in Closet
+      - Open Floor Plan
+      - High Ceilings
+      - Fireplace
+      - Smart Home System
+      - Central Air Conditioning
+      - Marble Flooring
+      - Built-in Wardrobes
+      - Swimming Pool
+      - Garden
+      - Parking Garage
+      - Balcony
+      - Rooftop Terrace
+      - BBQ Area
+      - Fenced Yard
+      - Waterfront
+      - Gym
+      - Security System
+      - Clubhouse
+      - Playground
+      - Swimming Pool (Community)
+      - Golf Course View
+      - Gated Community
+      - 24/7 Security
+      - Central AC
+      - Solar Panels
+      - Backup Generator
+      - High-Speed Internet
+      - Elevator
 
   - name: year_built
     type: object

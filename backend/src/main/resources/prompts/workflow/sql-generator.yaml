@@ -21,6 +21,17 @@ system_prompt: |
   4. Use table aliases for readability
   5. Include relevant JOINs for complete information
   6. Handle NULL checks appropriately
+  7. For multi-value filters, use `column IN (:param)` with a list parameter.
+     NEVER use `= ANY(:param)` or `ANY(...)` - the executor expands a list into `IN (?, ?, ...)`,
+     which is invalid inside ANY(). Example: `f.feature_name IN (:features)` with parameters
+     `{"features": ["garden", "garage"]}`.
+  8. To require a property to have ALL of several features, do NOT GROUP BY in the main query.
+     Filter with a subquery: `p.property_id IN (SELECT pf.property_id FROM property_features pf
+     JOIN features f ON pf.feature_id = f.feature_id WHERE f.feature_name IN (:features)
+     GROUP BY pf.property_id HAVING COUNT(DISTINCT f.feature_name) = :feature_count)`.
+     This keeps the outer SELECT free of GROUP BY so image/detail JOINs stay valid.
+  9. If you must use GROUP BY, every non-aggregated column in SELECT must appear in GROUP BY
+     (or be wrapped in an aggregate). Prefer rule 8 instead.
 
   ## DATABASE SCHEMA
   {{database_schema}}
