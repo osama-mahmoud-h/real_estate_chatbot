@@ -43,17 +43,22 @@ examples:
   - user_query: "Find rentals in New York with 2+ bedrooms and a pool and gym"
     sql: >
       SELECT p.property_id, p.title, p.property_type, p.listing_type, p.price,
-      p.city, p.state, p.bedrooms, p.bathrooms, p.area_sqft
+      p.city, p.state, p.bedrooms, p.bathrooms, p.area_sqft,
+      pi.image_url as primary_image
       FROM properties p
-      JOIN property_features pf ON p.property_id = pf.property_id
-      JOIN features f ON pf.feature_id = f.feature_id
+      LEFT JOIN property_images pi ON p.property_id = pi.property_id AND pi.is_primary = true
       WHERE p.property_status = 'active'
       AND p.listing_type = :listing_type::listing_type_enum
       AND LOWER(p.city) = LOWER(:city)
       AND p.bedrooms >= :min_bedrooms
-      AND f.feature_name IN (:features)
-      GROUP BY p.property_id
-      HAVING COUNT(DISTINCT f.feature_name) = :feature_count
+      AND p.property_id IN (
+        SELECT pf.property_id
+        FROM property_features pf
+        JOIN features f ON pf.feature_id = f.feature_id
+        WHERE f.feature_name IN (:features)
+        GROUP BY pf.property_id
+        HAVING COUNT(DISTINCT f.feature_name) = :feature_count
+      )
       ORDER BY p.listed_date DESC LIMIT :limit
 
   - user_query: "Compare properties 101 and 202"

@@ -1,10 +1,10 @@
 import { useSendMessage } from '../../application/useSendMessage';
 
 const SUGGESTIONS = [
-  'Show me 3-bedroom apartments under $500k',
-  'What listings are available downtown?',
-  'Find homes with a garden and garage',
-  'Compare prices in the two newest neighborhoods',
+  'Show me luxury villas for sale in New Cairo with a private pool',
+  'Find me 3-bedroom apartments in Zamalek under 5 million EGP',
+  "I'm looking for a townhouse or villa for sale in Maadi or October Gardens with a garden and swimming pool",
+  'What are the most recently listed properties in Cairo?',
 ];
 
 export function EmptyThread() {

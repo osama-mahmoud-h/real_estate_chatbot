@@ -4,6 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.chat.messages.SystemMessage;
+import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -17,13 +20,14 @@ import semsem.chatbot.prompt.PromptTemplate;
 import semsem.chatbot.prompt.loader.PromptDefinition;
 import semsem.chatbot.prompt.loader.PromptDefinitionsLoader;
 import semsem.chatbot.prompt.loader.PromptRegistry;
-import semsem.chatbot.service.llm.LLMService;
+import semsem.chatbot.service.llm.gateway.StructuredLLMGateway;
 import semsem.chatbot.service.schema.SchemaMetadataExtractor;
 import semsem.chatbot.service.schema.model.SchemaMetadata;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -36,7 +40,7 @@ import java.util.Optional;
 @Service
 public class DefaultSqlGeneratorService implements SqlGeneratorService {
 
-    private final LLMService llmService;
+    private final StructuredLLMGateway llmGateway;
     private final PromptRegistry promptRegistry;
     private final PromptDefinitionsLoader definitionsLoader;
     private final ObjectMapper objectMapper;
@@ -57,12 +61,12 @@ public class DefaultSqlGeneratorService implements SqlGeneratorService {
     private SchemaMetadata cachedSchemaMetadata;
     private Instant cacheExpiry;
 
-    public DefaultSqlGeneratorService(LLMService llmService,
+    public DefaultSqlGeneratorService(StructuredLLMGateway llmGateway,
                                        PromptRegistry promptRegistry,
                                        PromptDefinitionsLoader definitionsLoader,
                                        ObjectMapper objectMapper,
                                        ResourceLoader resourceLoader) {
-        this.llmService = llmService;
+        this.llmGateway = llmGateway;
         this.promptRegistry = promptRegistry;
         this.definitionsLoader = definitionsLoader;
         this.objectMapper = objectMapper;
@@ -87,11 +91,8 @@ public class DefaultSqlGeneratorService implements SqlGeneratorService {
         }
 
         try {
-            String prompt = buildPrompt(intent, entities, userQuery);
-            String llmResponse = llmService.generate(prompt);
-            log.debug("LLM response: {}", llmResponse);
-
-            SqlGeneratorOutput output = parseResponse(llmResponse);
+            Prompt prompt = buildPrompt(intent, entities, userQuery);
+            SqlGeneratorOutput output = llmGateway.invokeStructured(prompt, SqlGeneratorOutput.class);
 
             // Validate safety
             if (!validateSafety(output)) {
@@ -177,7 +178,7 @@ public class DefaultSqlGeneratorService implements SqlGeneratorService {
         }
     }
 
-    private String buildPrompt(QueryAnalyzerOutput.IntentResult intent,
+    private Prompt buildPrompt(QueryAnalyzerOutput.IntentResult intent,
                                 QueryAnalyzerOutput.ExtractedEntities entities,
                                 String userQuery) throws JsonProcessingException {
         PromptDefinition promptDef = promptRegistry.getOrThrow(PROMPT_NAME);
@@ -197,28 +198,7 @@ public class DefaultSqlGeneratorService implements SqlGeneratorService {
         String systemPrompt = new PromptTemplate(promptDef.getSystemPrompt()).format(variables);
         String userPrompt = new PromptTemplate(promptDef.getUserPrompt()).format(variables);
 
-        return systemPrompt + "\n\n" + userPrompt;
-    }
-
-    private SqlGeneratorOutput parseResponse(String response) throws JsonProcessingException {
-        String json = extractJson(response);
-        return objectMapper.readValue(json, SqlGeneratorOutput.class);
-    }
-
-    private String extractJson(String response) {
-        String cleaned = response.trim();
-
-        if (cleaned.startsWith("```json")) {
-            cleaned = cleaned.substring(7);
-        } else if (cleaned.startsWith("```")) {
-            cleaned = cleaned.substring(3);
-        }
-
-        if (cleaned.endsWith("```")) {
-            cleaned = cleaned.substring(0, cleaned.length() - 3);
-        }
-
-        return cleaned.trim();
+        return new Prompt(List.of(new SystemMessage(systemPrompt), new UserMessage(userPrompt)));
     }
 
     private boolean validateSafety(SqlGeneratorOutput output) {

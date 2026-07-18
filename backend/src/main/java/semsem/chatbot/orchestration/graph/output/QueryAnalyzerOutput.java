@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import semsem.chatbot.model.enums.UserIntent;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -19,7 +20,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class QueryAnalyzerOutput {
+public class QueryAnalyzerOutput implements Serializable {
 
     private IntentResult intent;
     private ExtractedEntities entities;
@@ -30,7 +31,7 @@ public class QueryAnalyzerOutput {
     @NoArgsConstructor
     @AllArgsConstructor
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class IntentResult {
+    public static class IntentResult implements Serializable {
         private String name;
         private double confidence;
         @JsonProperty("requires_sql")
@@ -47,7 +48,7 @@ public class QueryAnalyzerOutput {
     @NoArgsConstructor
     @AllArgsConstructor
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class ExtractedEntities {
+    public static class ExtractedEntities implements Serializable {
         @JsonProperty("property_type")
         private String propertyType;
 
@@ -90,7 +91,7 @@ public class QueryAnalyzerOutput {
     @NoArgsConstructor
     @AllArgsConstructor
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class LocationEntity {
+    public static class LocationEntity implements Serializable {
         private String city;
         private String state;
         private String country;
@@ -104,7 +105,7 @@ public class QueryAnalyzerOutput {
     @NoArgsConstructor
     @AllArgsConstructor
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class PriceRange {
+    public static class PriceRange implements Serializable {
         private BigDecimal min;
         private BigDecimal max;
         @Builder.Default
@@ -116,7 +117,7 @@ public class QueryAnalyzerOutput {
     @NoArgsConstructor
     @AllArgsConstructor
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class RangeValue {
+    public static class RangeValue implements Serializable {
         private Integer min;
         private Integer max;
         private Integer exact;
@@ -131,7 +132,7 @@ public class QueryAnalyzerOutput {
     @NoArgsConstructor
     @AllArgsConstructor
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class ExtractedToken {
+    public static class ExtractedToken implements Serializable {
         private String type;
         private String value;
         @JsonProperty("original_text")
