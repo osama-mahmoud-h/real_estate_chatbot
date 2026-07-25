@@ -54,29 +54,35 @@ httpClient.interceptors.response.use(
   async (error: AxiosError) => {
     const original = error.config as RetriableConfig | undefined;
     const status = error.response?.status;
-
     const isAuthEndpoint = original?.url?.includes('/auth/');
 
-    if (status === 401 && original && !original._retry && !isAuthEndpoint) {
-      original._retry = true;
-
-      if (!refreshPromise) {
-        refreshPromise = refreshAccessToken().finally(() => {
-          refreshPromise = null;
-        });
-      }
-
-      const newToken = await refreshPromise;
-
-      if (newToken) {
-        original.headers.Authorization = `Bearer ${newToken}`;
-        return httpClient(original);
-      }
-
-      // Refresh failed → session is dead. Let the auth layer route to /login.
-      onUnauthorized();
+    // Only protected endpoints returning 401 are recoverable via refresh.
+    if (status !== 401 || !original || isAuthEndpoint) {
+      return Promise.reject(error);
     }
 
+    // Already retried once and still unauthorized → the session is unrecoverable.
+    if (original._retry) {
+      onUnauthorized();
+      return Promise.reject(error);
+    }
+    original._retry = true;
+
+    if (!refreshPromise) {
+      refreshPromise = refreshAccessToken().finally(() => {
+        refreshPromise = null;
+      });
+    }
+
+    const newToken = await refreshPromise;
+
+    if (newToken) {
+      original.headers.Authorization = `Bearer ${newToken}`;
+      return httpClient(original);
+    }
+
+    // No token could be minted → session is dead. Let the auth layer route to /login.
+    onUnauthorized();
     return Promise.reject(error);
   },
 );

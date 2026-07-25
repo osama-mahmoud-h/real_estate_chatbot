@@ -3,8 +3,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/shared/ui/Input';
+import { PasswordInput } from '@/shared/ui/PasswordInput';
 import { Button } from '@/shared/ui/Button';
 import { toApiErrorMessage } from '@/shared/api/httpClient';
+import { saveCredential } from '@/shared/lib/credentials';
+import { fullName } from '../../domain/User';
 import { useRegister } from '../../application/useRegister';
 
 const schema = z.object({
@@ -28,7 +31,10 @@ export function RegisterForm() {
 
   const onSubmit = handleSubmit((values) => {
     registerMutation.mutate(values, {
-      onSuccess: () => navigate('/', { replace: true }),
+      onSuccess: async (result) => {
+        await saveCredential(values.email, values.password, fullName(result.user));
+        navigate('/', { replace: true });
+      },
     });
   });
 
@@ -64,9 +70,8 @@ export function RegisterForm() {
         error={errors.phoneNumber?.message}
         {...register('phoneNumber')}
       />
-      <Input
+      <PasswordInput
         label="Password"
-        type="password"
         autoComplete="new-password"
         placeholder="At least 8 characters"
         error={errors.password?.message}
