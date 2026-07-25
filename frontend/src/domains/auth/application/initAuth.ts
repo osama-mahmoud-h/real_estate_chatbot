@@ -23,6 +23,7 @@ export function initAuth(): void {
       }
     },
 
+    // Wipe the session; ProtectedRoute reacts to isAuthenticated and routes to /login.
     onUnauthorized: () => useAuthStore.getState().clear(),
   });
 }

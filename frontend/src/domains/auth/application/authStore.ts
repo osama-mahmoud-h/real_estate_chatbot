@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 import type { AuthTokens } from '../domain/AuthTokens';
 import type { User } from '../domain/User';
 import type { AuthResult } from '../domain/AuthRepository';
+import { isAccessTokenExpired } from '../domain/jwt';
 
 interface AuthState {
   user: User | null;
@@ -24,10 +25,14 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'auth-storage',
       partialize: (state) => ({ user: state.user, tokens: state.tokens }),
-      // Recompute the derived flag from persisted tokens on rehydrate.
+      // Recompute the derived flag on rehydrate. An expired access token still
+      // counts as a session when a refresh token exists (the interceptor will
+      // silently refresh); with neither valid, there is no session → /login.
       onRehydrateStorage: () => (state) => {
         if (state) {
-          state.isAuthenticated = !!state.tokens?.accessToken;
+          const tokens = state.tokens;
+          state.isAuthenticated =
+            !!tokens && (!isAccessTokenExpired(tokens.accessToken) || !!tokens.refreshToken);
         }
       },
     },
