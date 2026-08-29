@@ -3,14 +3,12 @@ package semsem.chatbot.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import semsem.chatbot.model.entity.Conversation;
-import semsem.chatbot.model.enums.ConversationStatus;
+import semsem.chatbot.domain.conversation.Conversation;
+import semsem.chatbot.domain.conversation.ConversationStatus;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -58,31 +56,6 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
     @Query("SELECT COUNT(c) FROM Conversation c WHERE c.appUser.userId = :userId AND c.status = :status")
     long countByUserIdAndStatus(@Param("userId") Long userId, @Param("status") ConversationStatus status);
 
-    @Modifying
-    @Query("UPDATE Conversation c SET c.status = :status, c.updatedAt = :updatedAt WHERE c.conversationId = :conversationId")
-    int updateStatus(
-            @Param("conversationId") Long conversationId,
-            @Param("status") ConversationStatus status,
-            @Param("updatedAt") Instant updatedAt
-    );
-
-    @Modifying
-    @Query("UPDATE Conversation c SET c.title = :title, c.updatedAt = :updatedAt WHERE c.conversationId = :conversationId")
-    int updateTitle(
-            @Param("conversationId") Long conversationId,
-            @Param("title") String title,
-            @Param("updatedAt") Instant updatedAt
-    );
-
-    @Modifying
-    @Query("UPDATE Conversation c SET c.summary = :summary, c.updatedAt = :updatedAt WHERE c.conversationId = :conversationId")
-    int updateSummary(
-            @Param("conversationId") Long conversationId,
-            @Param("summary") String summary,
-            @Param("updatedAt") Instant updatedAt
-    );
-
-    @Modifying
-    @Query("DELETE FROM Conversation c WHERE c.appUser.userId = :userId AND c.status = :status")
-    int deleteByUserIdAndStatus(@Param("userId") Long userId, @Param("status") ConversationStatus status);
+    // Bulk status/title/summary updates were removed: they bypassed the aggregate
+    // root and silently skipped its invariants. Mutate via Conversation, then save.
 }

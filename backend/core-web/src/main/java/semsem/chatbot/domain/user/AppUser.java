@@ -1,16 +1,10 @@
-package semsem.chatbot.model.entity;
+package semsem.chatbot.domain.user;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import semsem.chatbot.model.enums.UserRole;
 
 import java.time.Instant;
-import java.util.Collection;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "users")
@@ -20,7 +14,7 @@ import java.util.stream.Collectors;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AppUser implements UserDetails {
+public class AppUser {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -84,35 +78,7 @@ public class AppUser implements UserDetails {
         createdAt = Instant.now();
     }
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles.stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public String getUsername() {
-        return email;
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return accountNonExpired;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return accountNonLocked;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return credentialsNonExpired;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return enabled;
+    public void recordLogin() {
+        lastLoginAt = Instant.now();
     }
 }

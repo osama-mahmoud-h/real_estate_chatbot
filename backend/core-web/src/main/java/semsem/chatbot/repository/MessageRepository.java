@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import semsem.chatbot.model.entity.Message;
+import semsem.chatbot.domain.conversation.Message;
 import semsem.chatbot.model.enums.MessageRole;
 
 import java.time.Instant;
@@ -48,7 +48,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
             @Param("role") MessageRole role
     );
 
-    @Query("SELECT COALESCE(SUM(m.totalTokens), 0) FROM Message m WHERE m.conversation.conversationId = :conversationId")
+    @Query("SELECT COALESCE(SUM(m.tokenUsage.totalTokens), 0) FROM Message m WHERE m.conversation.conversationId = :conversationId")
     int sumTotalTokensByConversationId(@Param("conversationId") Long conversationId);
 
     @Query("SELECT AVG(m.latencyMs) FROM Message m WHERE m.conversation.conversationId = :conversationId AND m.role = 'ASSISTANT'")

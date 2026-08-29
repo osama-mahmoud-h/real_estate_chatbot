@@ -104,6 +104,61 @@ graph TD
 | Build | Maven |
 | Containerization | Docker, Docker Compose |
 
+## Run Guide
+
+### Prerequisites
+- **Java 17**
+- **Node.js** (v18+)
+- **Docker & Docker Compose**
+- LLM Provider API Keys (e.g., Gemini, Cohere)
+
+### 1. Environment Setup
+Clone the repository and set up the required environment variables:
+```bash
+# Root environment
+cp .env.example .env
+
+# Backend environment (Configures DB, API Keys, LLM Provider)
+cp backend/.env.example backend/.env
+
+# Frontend environment (Configures API endpoints)
+cp frontend/.env.example frontend/.env
+```
+*Note: Make sure to populate the `.env` files with your actual database credentials and API keys.*
+
+### 2. Running the Infrastructure & Backend (Docker)
+The easiest way to get the backend, PostgreSQL (with pgvector), and Redis running is via Docker Compose:
+
+```bash
+docker-compose up -d
+```
+The backend API will be available at `http://localhost:8080`.
+
+### 3. Running the Backend Locally (Optional)
+If you prefer running the Spring Boot backend locally for development, you can start just the database and Redis containers first:
+
+```bash
+docker-compose up -d postgres redis
+```
+Then, start the application using the Maven wrapper:
+```bash
+cd backend
+./mvnw clean install
+./mvnw spring-boot:run
+```
+*(Optionally use `cd backend && make run` if you prefer Make)*
+
+### 4. Running the Frontend
+The frontend is a React application built with Vite:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+The frontend UI will be accessible at `http://localhost:5173`.
+
+
 ## Contributing
 
 1. Fork the repository

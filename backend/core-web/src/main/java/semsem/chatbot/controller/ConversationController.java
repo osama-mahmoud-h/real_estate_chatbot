@@ -17,7 +17,7 @@ import semsem.chatbot.model.dto.request.CreateConversationRequest;
 import semsem.chatbot.model.dto.request.UpdateConversationRequest;
 import semsem.chatbot.model.dto.response.ConversationResponse;
 import semsem.chatbot.model.dto.response.MyApiResponse;
-import semsem.chatbot.model.enums.ConversationStatus;
+import semsem.chatbot.domain.conversation.ConversationStatus;
 import semsem.chatbot.service.chat.ConversationService;
 
 import java.util.List;

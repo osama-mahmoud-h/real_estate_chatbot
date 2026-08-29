@@ -26,6 +26,16 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
+		<!-- JPA annotations for VectorChunkEntity. -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		<!-- Jackson: prompt loaders and structured LLM output parsing. -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-json</artifactId>
+		</dependency>
 		<!-- Schema introspection over JDBC datasources. -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

@@ -1,4 +1,4 @@
-package semsem.chatbot.model.enums;
+package semsem.chatbot.domain.conversation;
 
 public enum ConversationStatus {
     ACTIVE,

@@ -12,16 +12,15 @@ import semsem.chatbot.mapper.ConversationMapper;
 import semsem.chatbot.model.dto.request.CreateConversationRequest;
 import semsem.chatbot.model.dto.request.UpdateConversationRequest;
 import semsem.chatbot.model.dto.response.ConversationResponse;
-import semsem.chatbot.model.entity.AppUser;
-import semsem.chatbot.model.entity.Conversation;
-import semsem.chatbot.model.entity.Message;
-import semsem.chatbot.model.enums.ConversationStatus;
+import semsem.chatbot.domain.user.AppUser;
+import semsem.chatbot.domain.conversation.Conversation;
+import semsem.chatbot.domain.conversation.Message;
+import semsem.chatbot.domain.conversation.ConversationStatus;
 import semsem.chatbot.repository.ConversationRepository;
 import semsem.chatbot.repository.MessageRepository;
 import semsem.chatbot.repository.UserRepository;
 import semsem.chatbot.service.chat.ConversationService;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -154,8 +153,7 @@ public class ConversationServiceImpl implements ConversationService {
             Conversation conversation = conversationRepository.findByUserEmailAndConversationId(userEmail, conversationId)
                     .orElseThrow(() -> new ResourceNotFoundException("Conversation", "conversationId", conversationId));
 
-            conversation.setStatus(ConversationStatus.ARCHIVED);
-            conversation.setUpdatedAt(Instant.now());
+            conversation.archive();
             conversationRepository.save(conversation);
 
             log.info("Archived conversation {}", conversationId);
@@ -174,7 +172,7 @@ public class ConversationServiceImpl implements ConversationService {
             Conversation conversation = conversationRepository.findByUserEmailAndConversationId(userEmail, conversationId)
                     .orElseThrow(() -> new ResourceNotFoundException("Conversation", "conversationId", conversationId));
 
-            messageRepository.deleteByConversationId(conversationId);
+            // cascade + orphanRemoval take the messages with it
             conversationRepository.delete(conversation);
 
             log.info("Deleted conversation {}", conversationId);
@@ -212,32 +210,18 @@ public class ConversationServiceImpl implements ConversationService {
     @Override
     public void updateConversationSummary(Long conversationId, String summary) {
         try {
-            conversationRepository.updateSummary(conversationId, summary, Instant.now());
+            Conversation conversation = conversationRepository.findByConversationId(conversationId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Conversation", "conversationId", conversationId));
+
+            conversation.summarize(summary);
+            conversationRepository.save(conversation);
+
             log.debug("Updated summary for conversation {}", conversationId);
         } catch (ApiException ex) {
             throw ex;
         } catch (Exception ex) {
             log.error("Error updating summary for conversation {}: {}", conversationId, ex.getMessage(), ex);
             throw new ApiException("Failed to update conversation summary: " + ex.getMessage());
-        }
-    }
-
-    @Transactional
-    @Override
-    public void updateTokenCount(Long conversationId, int additionalTokens) {
-        try {
-            Conversation conversation = conversationRepository.findByConversationId(conversationId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Conversation", "conversationId", conversationId));
-
-            int newCount = (conversation.getTokenCount() != null ? conversation.getTokenCount() : 0) + additionalTokens;
-            conversation.setTokenCount(newCount);
-            conversation.setUpdatedAt(Instant.now());
-            conversationRepository.save(conversation);
-        } catch (ApiException ex) {
-            throw ex;
-        } catch (Exception ex) {
-            log.error("Error updating token count for conversation {}: {}", conversationId, ex.getMessage(), ex);
-            throw new ApiException("Failed to update token count: " + ex.getMessage());
         }
     }
 

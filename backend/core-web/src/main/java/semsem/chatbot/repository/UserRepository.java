@@ -2,7 +2,7 @@ package semsem.chatbot.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import semsem.chatbot.model.entity.AppUser;
+import semsem.chatbot.domain.user.AppUser;
 
 import java.util.Optional;
 

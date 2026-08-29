@@ -15,12 +15,12 @@ import semsem.chatbot.model.dto.request.LoginRequest;
 import semsem.chatbot.model.dto.request.RefreshTokenRequest;
 import semsem.chatbot.model.dto.request.RegisterRequest;
 import semsem.chatbot.model.dto.response.AuthResponse;
-import semsem.chatbot.model.entity.AppUser;
-import semsem.chatbot.model.enums.UserRole;
+import semsem.chatbot.domain.user.AppUser;
+import semsem.chatbot.domain.user.UserRole;
 import semsem.chatbot.repository.UserRepository;
 import semsem.chatbot.security.JwtTokenProvider;
+import semsem.chatbot.security.SecurityUser;
 
-import java.time.Instant;
 import java.util.Set;
 
 @Slf4j
@@ -71,8 +71,8 @@ public class AuthService {
                 )
         );
 
-        AppUser user = (AppUser) authentication.getPrincipal();
-        user.setLastLoginAt(Instant.now());
+        AppUser user = ((SecurityUser) authentication.getPrincipal()).getAppUser();
+        user.recordLogin();
         userRepository.save(user);
 
         log.info("User logged in: {}", user.getEmail());
@@ -96,8 +96,9 @@ public class AuthService {
 
     private AuthResponse generateAuthResponse(AppUser user) {
         try {
-            String accessToken = jwtTokenProvider.generateAccessToken(user);
-            String refreshToken = jwtTokenProvider.generateRefreshToken(user);
+            SecurityUser principal = new SecurityUser(user);
+            String accessToken = jwtTokenProvider.generateAccessToken(principal);
+            String refreshToken = jwtTokenProvider.generateRefreshToken(principal);
 
             return AuthResponse.builder()
                     .accessToken(accessToken)

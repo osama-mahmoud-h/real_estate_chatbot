@@ -6,17 +6,13 @@ import semsem.chatbot.model.dto.request.CreateConversationRequest;
 import semsem.chatbot.model.dto.request.UpdateConversationRequest;
 import semsem.chatbot.model.dto.response.ConversationResponse;
 import semsem.chatbot.model.dto.response.MessageResponse;
-import semsem.chatbot.model.entity.AppUser;
-import semsem.chatbot.model.entity.Conversation;
-import semsem.chatbot.model.entity.Message;
-import semsem.chatbot.model.enums.ConversationStatus;
+import semsem.chatbot.domain.user.AppUser;
+import semsem.chatbot.domain.conversation.Conversation;
+import semsem.chatbot.domain.conversation.Message;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -114,28 +110,16 @@ public class ConversationMapper {
     }
 
     public Conversation toEntity(CreateConversationRequest request, AppUser user) {
-        Instant now = Instant.now();
-
-        return Conversation.builder()
-                .title(request.getTitle() != null ? request.getTitle() : "New Conversation")
-                .appUser(user)
-                .status(ConversationStatus.ACTIVE)
-                .tokenCount(0)
-                .messages(new ArrayList<>())
-                .createdAt(now)
-                .updatedAt(now)
-                .build();
+        return Conversation.start(user, request.getTitle());
     }
 
     public void updateEntity(Conversation conversation, UpdateConversationRequest request) {
         if (request.getTitle() != null) {
-            conversation.setTitle(request.getTitle());
+            conversation.rename(request.getTitle());
         }
         if (request.getStatus() != null) {
-            conversation.setStatus(request.getStatus());
+            conversation.changeStatus(request.getStatus());
         }
-
-        conversation.setUpdatedAt(Instant.now());
     }
 
 }

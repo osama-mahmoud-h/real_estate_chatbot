@@ -3,12 +3,11 @@ package semsem.chatbot.mapper;
 import org.springframework.stereotype.Service;
 import semsem.chatbot.model.dto.request.CreateMessageRequest;
 import semsem.chatbot.model.dto.response.MessageResponse;
-import semsem.chatbot.model.entity.Conversation;
-import semsem.chatbot.model.entity.Message;
+import semsem.chatbot.domain.conversation.Conversation;
+import semsem.chatbot.domain.conversation.Message;
+import semsem.chatbot.domain.conversation.TokenUsage;
 
-import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,9 +26,9 @@ public class MessageMapper {
                 .content(message.getContent())
                 .providerLlm(message.getProviderLlm())
                 .modelUsed(message.getModelUsed())
-                .promptTokens(message.getPromptTokens())
-                .completionTokens(message.getCompletionTokens())
-                .totalTokens(message.getTotalTokens())
+                .promptTokens(message.getTokenUsage().getPromptTokens())
+                .completionTokens(message.getTokenUsage().getCompletionTokens())
+                .totalTokens(message.getTokenUsage().getTotalTokens())
                 .latencyMs(message.getLatencyMs())
                 .parentMessageId(message.getParentMessageId())
                 .metadata(message.getMetadata())
@@ -47,50 +46,55 @@ public class MessageMapper {
                 .collect(Collectors.toList());
     }
 
-    public Message toEntity(CreateMessageRequest request, Conversation conversation) {
-
-        return Message.builder()
-                .conversation(conversation)
-                .role(request.getRole())
-                .content(request.getContent())
-                .providerLlm(request.getProviderLlm())
-                .modelUsed(request.getModelUsed())
-                .promptTokens(request.getPromptTokens())
-                .completionTokens(request.getCompletionTokens())
-                .totalTokens(request.getTotalTokens())
-                .latencyMs(request.getLatencyMs())
-                .parentMessageId(request.getParentMessageId())
-                .metadata(request.getMetadata())
-                .processedAt(request.getLatencyMs() != null ? Instant.now() : null)
-                .build();
+    /**
+     * Builds a detached message. The caller attaches it via
+     * {@link Conversation#addMessage}, which owns the conversation's counters.
+     */
+    public Message toEntity(CreateMessageRequest request) {
+        Message message = Message.from(
+                request.getRole(),
+                request.getContent(),
+                request.getParentMessageId(),
+                request.getMetadata()
+        );
+        message.recordGeneration(
+                request.getProviderLlm(),
+                request.getModelUsed(),
+                usageOf(request),
+                request.getLatencyMs()
+        );
+        return message;
     }
 
     public void updateEntity(Message message, CreateMessageRequest request) {
         if (request.getContent() != null) {
-            message.setContent(request.getContent());
+            message.editContent(request.getContent());
         }
         if (request.getMetadata() != null) {
-            message.setMetadata(request.getMetadata());
+            message.describeWith(request.getMetadata());
         }
-        if (request.getProviderLlm() != null) {
-            message.setProviderLlm(request.getProviderLlm());
-        }
-        if (request.getModelUsed() != null) {
-            message.setModelUsed(request.getModelUsed());
-        }
-        if (request.getPromptTokens() != null) {
-            message.setPromptTokens(request.getPromptTokens());
-        }
-        if (request.getCompletionTokens() != null) {
-            message.setCompletionTokens(request.getCompletionTokens());
-        }
-        if (request.getTotalTokens() != null) {
-            message.setTotalTokens(request.getTotalTokens());
-        }
-        if (request.getLatencyMs() != null) {
-            message.setLatencyMs(request.getLatencyMs());
-            message.setProcessedAt(Instant.now());
-        }
+        message.recordGeneration(
+                request.getProviderLlm() != null ? request.getProviderLlm() : message.getProviderLlm(),
+                request.getModelUsed() != null ? request.getModelUsed() : message.getModelUsed(),
+                mergeUsage(message.getTokenUsage(), request),
+                request.getLatencyMs() != null ? request.getLatencyMs() : message.getLatencyMs()
+        );
+    }
+
+    private TokenUsage usageOf(CreateMessageRequest request) {
+        return TokenUsage.of(
+                request.getPromptTokens(),
+                request.getCompletionTokens(),
+                request.getTotalTokens()
+        );
+    }
+
+    private TokenUsage mergeUsage(TokenUsage current, CreateMessageRequest request) {
+        return TokenUsage.of(
+                request.getPromptTokens() != null ? request.getPromptTokens() : current.getPromptTokens(),
+                request.getCompletionTokens() != null ? request.getCompletionTokens() : current.getCompletionTokens(),
+                request.getTotalTokens() != null ? request.getTotalTokens() : current.getTotalTokens()
+        );
     }
 
 
