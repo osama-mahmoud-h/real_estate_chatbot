@@ -48,7 +48,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
             @Param("role") MessageRole role
     );
 
-    @Query("SELECT COALESCE(SUM(m.totalTokens), 0) FROM Message m WHERE m.conversation.conversationId = :conversationId")
+    @Query("SELECT COALESCE(SUM(m.tokenUsage.totalTokens), 0) FROM Message m WHERE m.conversation.conversationId = :conversationId")
     int sumTotalTokensByConversationId(@Param("conversationId") Long conversationId);
 
     @Query("SELECT AVG(m.latencyMs) FROM Message m WHERE m.conversation.conversationId = :conversationId AND m.role = 'ASSISTANT'")

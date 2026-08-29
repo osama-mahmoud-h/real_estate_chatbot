@@ -49,9 +49,6 @@ public interface ConversationService {
     @Transactional
     void updateConversationSummary(Long conversationId, String summary);
 
-    @Transactional
-    void updateTokenCount(Long conversationId, int additionalTokens);
-
     @Transactional(readOnly = true)
     long getConversationCount(Long userId);
 

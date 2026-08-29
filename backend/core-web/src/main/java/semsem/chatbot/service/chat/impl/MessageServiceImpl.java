@@ -39,20 +39,17 @@ public class MessageServiceImpl implements MessageService {
             Conversation conversation = conversationRepository.findByConversationId(conversationId)
                     .orElseThrow(() -> new ResourceNotFoundException("Conversation", "conversationId", conversationId));
 
-            Message message = messageMapper.toEntity(request, conversation);
-            Message savedMessage = messageRepository.save(message);
+            // The root owns the append: it stamps updatedAt and adds the tokens.
+            Message message = conversation.addMessage(messageMapper.toEntity(request));
 
-            // Update conversation's updatedAt and token count
-            conversation.setUpdatedAt(Instant.now());
-            if (request.getTotalTokens() != null) {
-                int currentTokens = conversation.getTokenCount() != null ? conversation.getTokenCount() : 0;
-                conversation.setTokenCount(currentTokens + request.getTotalTokens());
-            }
-            conversationRepository.save(conversation);
+            // conversation is already managed, so flush cascades PERSIST to the new
+            // child and assigns its id in place. save() would merge instead, which
+            // persists a copy and leaves this reference with a null messageId.
+            conversationRepository.flush();
 
-            log.info("Created message {} in conversation {}", savedMessage.getMessageId(), conversationId);
+            log.info("Created message {} in conversation {}", message.getMessageId(), conversationId);
 
-            return messageMapper.toResponse(savedMessage);
+            return messageMapper.toResponse(message);
         } catch (ApiException ex) {
             throw ex;
         } catch (Exception ex) {
