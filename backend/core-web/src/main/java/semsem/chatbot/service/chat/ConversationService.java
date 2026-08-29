@@ -6,8 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 import semsem.chatbot.model.dto.request.CreateConversationRequest;
 import semsem.chatbot.model.dto.request.UpdateConversationRequest;
 import semsem.chatbot.model.dto.response.ConversationResponse;
-import semsem.chatbot.model.entity.Conversation;
-import semsem.chatbot.model.enums.ConversationStatus;
+import semsem.chatbot.domain.conversation.Conversation;
+import semsem.chatbot.domain.conversation.ConversationStatus;
 
 import java.util.List;
 

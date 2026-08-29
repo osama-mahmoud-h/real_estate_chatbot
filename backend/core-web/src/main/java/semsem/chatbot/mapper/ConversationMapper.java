@@ -6,10 +6,10 @@ import semsem.chatbot.model.dto.request.CreateConversationRequest;
 import semsem.chatbot.model.dto.request.UpdateConversationRequest;
 import semsem.chatbot.model.dto.response.ConversationResponse;
 import semsem.chatbot.model.dto.response.MessageResponse;
-import semsem.chatbot.model.entity.AppUser;
-import semsem.chatbot.model.entity.Conversation;
-import semsem.chatbot.model.entity.Message;
-import semsem.chatbot.model.enums.ConversationStatus;
+import semsem.chatbot.domain.user.AppUser;
+import semsem.chatbot.domain.conversation.Conversation;
+import semsem.chatbot.domain.conversation.Message;
+import semsem.chatbot.domain.conversation.ConversationStatus;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

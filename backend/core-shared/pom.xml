@@ -10,28 +10,11 @@
 
 	<artifactId>core-shared</artifactId>
 	<name>core-shared</name>
-	<description>Shared domain model, enums and exceptions used by core-ai and core-web.</description>
+	<description>Shared kernel: enums that core-ai and core-web both speak. No framework dependencies.</description>
 
-	<dependencies>
-		<!-- JPA annotations for entities. -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-jpa</artifactId>
-		</dependency>
-		<!-- Bean validation + Jackson for DTOs. -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-validation</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-json</artifactId>
-		</dependency>
-		<!-- AppUser entity implements Spring Security's UserDetails contract. -->
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-core</artifactId>
-		</dependency>
-	</dependencies>
+	<!--
+		Deliberately dependency-free. Persistence, security and serialization belong to
+		the modules that own those concerns, not to the vocabulary they share.
+	-->
 
 </project>

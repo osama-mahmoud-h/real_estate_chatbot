@@ -7,8 +7,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import semsem.chatbot.model.entity.Conversation;
-import semsem.chatbot.model.enums.ConversationStatus;
+import semsem.chatbot.domain.conversation.Conversation;
+import semsem.chatbot.domain.conversation.ConversationStatus;
 
 import java.time.Instant;
 import java.util.List;

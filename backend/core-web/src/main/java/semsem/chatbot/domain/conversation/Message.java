@@ -1,4 +1,4 @@
-package semsem.chatbot.model.entity;
+package semsem.chatbot.domain.conversation;
 
 
 import jakarta.persistence.*;

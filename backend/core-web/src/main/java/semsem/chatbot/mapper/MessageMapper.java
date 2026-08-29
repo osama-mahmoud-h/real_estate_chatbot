@@ -3,8 +3,8 @@ package semsem.chatbot.mapper;
 import org.springframework.stereotype.Service;
 import semsem.chatbot.model.dto.request.CreateMessageRequest;
 import semsem.chatbot.model.dto.response.MessageResponse;
-import semsem.chatbot.model.entity.Conversation;
-import semsem.chatbot.model.entity.Message;
+import semsem.chatbot.domain.conversation.Conversation;
+import semsem.chatbot.domain.conversation.Message;
 
 import java.time.Instant;
 import java.util.List;

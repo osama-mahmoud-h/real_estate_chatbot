@@ -1,4 +1,4 @@
-package semsem.chatbot.model.entity;
+package semsem.chatbot.domain.conversation;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -6,7 +6,8 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.type.SqlTypes;
-import semsem.chatbot.model.enums.ConversationStatus;
+import semsem.chatbot.domain.user.AppUser;
+import semsem.chatbot.domain.conversation.ConversationStatus;
 
 import java.time.Instant;
 import java.time.LocalDateTime;

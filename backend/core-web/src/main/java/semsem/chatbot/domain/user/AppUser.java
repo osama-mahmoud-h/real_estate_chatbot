@@ -1,11 +1,11 @@
-package semsem.chatbot.model.entity;
+package semsem.chatbot.domain.user;
 
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import semsem.chatbot.model.enums.UserRole;
+import semsem.chatbot.domain.user.UserRole;
 
 import java.time.Instant;
 import java.util.Collection;

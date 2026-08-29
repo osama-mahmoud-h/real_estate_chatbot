@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import semsem.chatbot.model.enums.ConversationStatus;
+import semsem.chatbot.domain.conversation.ConversationStatus;
 
 @Data
 @Builder

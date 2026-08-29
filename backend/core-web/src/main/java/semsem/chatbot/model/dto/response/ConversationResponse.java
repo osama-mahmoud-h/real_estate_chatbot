@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import semsem.chatbot.model.enums.ConversationStatus;
+import semsem.chatbot.domain.conversation.ConversationStatus;
 
 import java.time.Instant;
 import java.util.List;
