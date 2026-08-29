@@ -13,17 +13,19 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variants: Record<Variant, string> = {
   primary:
-    'bg-brand-gradient text-white shadow-lift hover:brightness-110 focus-visible:ring-primary-500 disabled:opacity-60',
+    'bg-forest text-paper hover:bg-forest-deep disabled:bg-edge disabled:text-ink-faint dark:bg-forest-accent dark:hover:bg-forest-bright dark:disabled:bg-night-strong dark:disabled:text-mist-faint',
   secondary:
-    'bg-white text-slate-700 border border-slate-200 shadow-sm hover:bg-slate-50 focus-visible:ring-slate-400',
-  ghost: 'text-slate-600 hover:bg-slate-100 focus-visible:ring-slate-300',
-  danger: 'bg-red-600 text-white shadow-sm hover:bg-red-700 focus-visible:ring-red-500',
+    'border border-edge-strong bg-paper-card text-ink-body hover:bg-paper-sunk disabled:opacity-60 dark:border-night-strong dark:bg-night-panel dark:text-mist dark:hover:bg-night-raised',
+  ghost:
+    'text-ink-muted hover:bg-paper-sunk disabled:opacity-60 dark:text-mist-muted dark:hover:bg-night-panel',
+  danger:
+    'bg-brick text-paper hover:bg-brick/90 disabled:opacity-60 dark:bg-brick-bright dark:hover:bg-brick-bright/90',
 };
 
 const sizes: Record<Size, string> = {
-  sm: 'h-8 px-3 text-sm',
-  md: 'h-10 px-4 text-sm',
-  lg: 'h-12 px-5 text-[15px]',
+  sm: 'h-[34px] px-3.5 text-[13px]',
+  md: 'h-[42px] px-5 text-sm',
+  lg: 'h-[50px] px-6 text-[15px]',
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -32,9 +34,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       ref={ref}
       disabled={disabled || loading}
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-150',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
-        'active:scale-[0.98] disabled:cursor-not-allowed disabled:active:scale-100',
+        'inline-flex items-center justify-center gap-2 rounded-control font-semibold transition-colors duration-150',
+        'focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest-soft dark:focus-visible:ring-forest-accent/35',
+        'disabled:cursor-not-allowed',
         variants[variant],
         sizes[size],
         className,

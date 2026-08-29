@@ -5,7 +5,7 @@ interface AvatarProps {
   className?: string;
 }
 
-/** Circular initials avatar with a brand gradient fill. */
+/** Square-cornered initials avatar in the brand green. */
 export function Avatar({ name, className }: AvatarProps) {
   const initials = name
     .split(' ')
@@ -18,8 +18,8 @@ export function Avatar({ name, className }: AvatarProps) {
   return (
     <span
       className={cn(
-        'inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full',
-        'bg-brand-gradient text-sm font-semibold text-white shadow-sm ring-1 ring-white/20',
+        'inline-flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-control',
+        'bg-forest-accent text-[12.5px] font-semibold tracking-wide text-paper',
         className,
       )}
       aria-hidden="true"

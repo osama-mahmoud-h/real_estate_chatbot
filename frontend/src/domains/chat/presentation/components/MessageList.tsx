@@ -21,7 +21,7 @@ export function MessageList({ messages, isThreadLoading, isSending }: MessageLis
 
   if (isThreadLoading) {
     return (
-      <div className="flex flex-1 items-center justify-center text-slate-400">
+      <div className="flex flex-1 items-center justify-center text-ink-faint dark:text-mist-faint">
         <Spinner className="h-6 w-6" />
       </div>
     );
@@ -32,7 +32,7 @@ export function MessageList({ messages, isThreadLoading, isSending }: MessageLis
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-5 px-4 py-8">
+    <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-end gap-6 px-6 py-8">
       {messages.map((message) => (
         <MessageBubble key={message.messageId} message={message} />
       ))}

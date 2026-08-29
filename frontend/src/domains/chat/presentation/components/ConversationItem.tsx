@@ -17,21 +17,18 @@ export function ConversationItem({
   return (
     <div
       className={cn(
-        'group relative flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors',
+        'group flex h-10 items-center gap-2.5 rounded-control text-[13.5px] transition-colors',
         active
-          ? 'bg-white/10 text-white'
-          : 'text-slate-400 hover:bg-white/5 hover:text-slate-200',
+          ? 'border-l-[3px] border-forest-bright bg-paper/10 pl-[9px] pr-3 text-paper'
+          : 'px-3 text-moss hover:bg-paper/5 hover:text-moss-bright',
       )}
     >
-      {active && (
-        <span className="absolute inset-y-1.5 left-0 w-0.5 rounded-full bg-accent-400" />
-      )}
       <button
         type="button"
         onClick={onSelect}
-        className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
+        className="flex min-w-0 flex-1 items-center gap-2.5 text-left focus-visible:outline-none"
       >
-        <ChatIcon className={active ? 'text-accent-400' : 'text-slate-500'} />
+        <ChatIcon className={active ? 'text-forest-bright' : 'text-moss-faint'} />
         <span className="truncate">{conversation.title || 'Untitled chat'}</span>
       </button>
       <button
@@ -41,7 +38,7 @@ export function ConversationItem({
           onDelete();
         }}
         aria-label="Delete conversation"
-        className="shrink-0 rounded p-1 text-slate-500 opacity-0 transition hover:bg-white/10 hover:text-red-400 focus:opacity-100 group-hover:opacity-100"
+        className="shrink-0 rounded text-moss-muted opacity-0 transition hover:text-brick-bright focus:opacity-100 focus:outline-none group-hover:opacity-100"
       >
         <TrashIcon />
       </button>
@@ -52,17 +49,17 @@ export function ConversationItem({
 function ChatIcon({ className }: { className?: string }) {
   return (
     <svg
-      width="16"
-      height="16"
+      width="15"
+      height="15"
       viewBox="0 0 24 24"
       fill="none"
       className={cn('shrink-0', className)}
       aria-hidden="true"
     >
       <path
-        d="M21 12a8 8 0 01-11.6 7.1L4 20l1-4.5A8 8 0 1121 12z"
+        d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.5A8 8 0 1 1 21 12z"
         stroke="currentColor"
-        strokeWidth="2"
+        strokeWidth="1.8"
         strokeLinejoin="round"
       />
     </svg>
@@ -73,9 +70,9 @@ function TrashIcon() {
   return (
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path
-        d="M4 7h16M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m-8 0v12a1 1 0 001 1h6a1 1 0 001-1V7"
+        d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-8 0v12a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V7"
         stroke="currentColor"
-        strokeWidth="2"
+        strokeWidth="1.7"
         strokeLinecap="round"
         strokeLinejoin="round"
       />

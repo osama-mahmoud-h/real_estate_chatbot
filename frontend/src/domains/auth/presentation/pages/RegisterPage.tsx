@@ -5,12 +5,15 @@ import { RegisterForm } from '../components/RegisterForm';
 export default function RegisterPage() {
   return (
     <AuthShell
-      title="Create your account"
-      subtitle="Start chatting with the Real Estate Assistant"
+      title="Create account"
+      subtitle="A few details and Sarah can start searching the listings for you."
       footer={
         <>
           Already have an account?{' '}
-          <Link to="/login" className="font-medium text-primary-600 hover:text-primary-700">
+          <Link
+            to="/login"
+            className="font-medium text-forest-accent hover:text-forest hover:underline dark:text-forest-bright"
+          >
             Sign in
           </Link>
         </>

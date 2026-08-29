@@ -10,48 +10,73 @@
   }
 
   body {
-    @apply bg-slate-100 font-sans text-slate-900 antialiased transition-colors duration-300;
-    @apply dark:bg-ink-950 dark:text-slate-100;
-    font-feature-settings: 'cv11', 'ss01';
+    @apply bg-paper font-sans text-ink antialiased transition-colors duration-200;
+    @apply dark:bg-night dark:text-mist;
     text-rendering: optimizeLegibility;
   }
 }
 
-@layer utilities {
-  /* Gradient brand text */
-  .text-gradient {
-    @apply bg-gradient-to-br from-accent-600 to-primary-600 bg-clip-text text-transparent;
+@layer components {
+  /* Thread wallpaper: a sparse roof motif under a flat wash of the surface
+     colour, so the pattern reads at roughly 7% and never fights the bubbles. */
+  .thread-canvas {
+    background-color: theme('colors.paper.sunk');
+    background-image: linear-gradient(rgba(244, 241, 232, 0.74), rgba(244, 241, 232, 0.74)),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Cg fill='none' stroke='rgba(28,79,53,0.2)' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 46l12-9 12 9M22 44v14h16V44'/%3E%3Ccircle cx='96' cy='34' r='3'/%3E%3Cpath d='M120 74l10-8 10 8M124 72v12h12V72'/%3E%3Ccircle cx='44' cy='104' r='2.5'/%3E%3Cpath d='M62 150l12-9 12 9M66 148v14h16v-14'/%3E%3Ccircle cx='160' cy='132' r='3'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: auto, 200px 200px;
+    background-repeat: repeat;
   }
 
-  /* Thin custom scrollbar (light surfaces) */
+  .dark .thread-canvas {
+    background-color: theme('colors.night.DEFAULT');
+    background-image: linear-gradient(rgba(16, 23, 15, 0.74), rgba(16, 23, 15, 0.74)),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Cg fill='none' stroke='rgba(126,182,160,0.17)' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 46l12-9 12 9M22 44v14h16V44'/%3E%3Ccircle cx='96' cy='34' r='3'/%3E%3Cpath d='M120 74l10-8 10 8M124 72v12h12V72'/%3E%3Ccircle cx='44' cy='104' r='2.5'/%3E%3Cpath d='M62 150l12-9 12 9M66 148v14h16v-14'/%3E%3Ccircle cx='160' cy='132' r='3'/%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  /* Bullet lists in assistant answers: an em-dash marker in the brand green.
+     Written as plain CSS because a Tailwind arbitrary `content-['\2014']`
+     escapes the backslash and prints the literal escape sequence. */
+  .dash-list > li {
+    display: flex;
+    gap: 0.625rem;
+  }
+  .dash-list > li::before {
+    content: '\2014';
+    flex-shrink: 0;
+    @apply text-forest-bright;
+  }
+}
+
+@layer utilities {
+  /* Thin scrollbar for paper surfaces */
   .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: theme('colors.slate.300') transparent;
+    scrollbar-color: theme('colors.edge.strong') transparent;
   }
   .scrollbar-thin::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    @apply rounded-full bg-slate-300 dark:bg-white/15;
+    @apply rounded-full bg-edge-strong dark:bg-night-strong;
   }
   .scrollbar-thin::-webkit-scrollbar-track {
     background: transparent;
   }
   .dark .scrollbar-thin {
-    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+    scrollbar-color: theme('colors.night.strong') transparent;
   }
 
-  /* Thin scrollbar for dark surfaces (sidebar) */
+  /* Thin scrollbar for the forest sidebar */
   .scrollbar-dark {
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+    scrollbar-color: rgba(251, 250, 246, 0.16) transparent;
   }
   .scrollbar-dark::-webkit-scrollbar {
     width: 6px;
   }
   .scrollbar-dark::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.14);
+    background: rgba(251, 250, 246, 0.16);
     border-radius: 9999px;
   }
   .scrollbar-dark::-webkit-scrollbar-track {

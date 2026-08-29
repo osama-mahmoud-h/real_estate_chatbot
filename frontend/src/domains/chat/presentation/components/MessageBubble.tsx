@@ -11,32 +11,25 @@ export function MessageBubble({ message }: { message: Message }) {
   return (
     <div
       className={cn(
-        'flex',
-        isUser ? 'justify-end animate-enter-right' : 'justify-start animate-enter-left',
+        'flex flex-col gap-[7px]',
+        isUser ? 'items-end animate-enter-right' : 'items-start animate-enter-left',
       )}
     >
-      <div className={cn('flex max-w-[82%] gap-2.5', isUser && 'flex-row-reverse')}>
-        {!isUser && (
-          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-gradient text-[11px] font-bold text-white shadow-sm ring-1 ring-white/20">
-            AI
-          </span>
+      <div
+        className={cn(
+          'max-w-[85%] break-words px-[17px] py-3.5 text-[15px] leading-[1.62] sm:max-w-[600px]',
+          isUser
+            ? 'rounded-bubble rounded-br-[4px] bg-forest text-paper dark:bg-forest-accent'
+            : 'rounded-bubble rounded-bl-[4px] border border-edge bg-paper-card text-ink dark:border-night-edge dark:bg-night-panel dark:text-mist',
         )}
-        <div className={cn('flex flex-col gap-1', isUser ? 'items-end' : 'items-start')}>
-          <div
-            className={cn(
-              'break-words rounded-2xl px-4 py-2.5 text-sm leading-relaxed',
-              isUser
-                ? 'whitespace-pre-wrap rounded-br-md bg-brand-gradient text-white shadow-lift'
-                : 'rounded-bl-md border border-slate-200/80 bg-white text-slate-800 shadow-soft dark:border-white/10 dark:bg-ink-800 dark:text-slate-100',
-            )}
-          >
-            {isUser ? message.content : <Markdown>{message.content}</Markdown>}
-          </div>
-          {time && (
-            <span className="px-1 text-[11px] text-slate-400 dark:text-slate-500">{time}</span>
-          )}
-        </div>
+      >
+        {isUser ? message.content : <Markdown>{message.content}</Markdown>}
       </div>
+      {time && (
+        <span className="px-1 font-mono text-[11px] text-ink-faint dark:text-mist-faint">
+          {time}
+        </span>
+      )}
     </div>
   );
 }

@@ -22,7 +22,7 @@ export default function ChatPage() {
       >
         <div
           className={cn(
-            'absolute inset-0 bg-slate-900/40 transition-opacity',
+            'absolute inset-0 bg-night/50 transition-opacity',
             mobileOpen ? 'opacity-100' : 'opacity-0',
           )}
           onClick={() => setMobileOpen(false)}

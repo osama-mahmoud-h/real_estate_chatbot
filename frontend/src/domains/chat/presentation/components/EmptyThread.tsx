@@ -1,45 +1,67 @@
 import { useSendMessage } from '../../application/useSendMessage';
 
 const SUGGESTIONS = [
-  'Show me luxury villas for sale in New Cairo with a private pool',
-  'Find me 3-bedroom apartments in Zamalek under 5 million EGP',
-  "I'm looking for a townhouse or villa for sale in Maadi or October Gardens with a garden and swimming pool",
-  'What are the most recently listed properties in Cairo?',
+  {
+    label: 'Villas',
+    prompt: 'Show me luxury villas for sale in New Cairo with a private pool',
+  },
+  {
+    label: 'Apartments',
+    prompt: 'Find me 3-bedroom apartments in Zamalek under 5 million EGP',
+  },
+  {
+    label: 'Townhouses',
+    prompt: "I'm looking for a townhouse or villa for sale in Maadi or October Gardens",
+  },
+  {
+    label: 'New listings',
+    prompt: 'What are the most recently listed properties in Cairo?',
+  },
 ];
 
 export function EmptyThread() {
   const { send, isSending } = useSendMessage();
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center px-6 py-12 text-center">
-      <div className="mb-5 flex h-16 w-16 animate-float items-center justify-center rounded-3xl bg-brand-gradient text-3xl shadow-lift">
-        🏠
-      </div>
-      <h2 className="text-2xl font-bold tracking-tight text-slate-800 dark:text-slate-100">
-        How can I help you find a home?
-      </h2>
-      <p className="mt-2 max-w-md text-sm text-slate-500 dark:text-slate-400">
-        Ask about listings, prices, or neighborhoods in plain language — I’ll search for you.
-      </p>
+    /* Centred when it fits; on a phone it starts at the top and scrolls instead. */
+    <div className="flex flex-1 flex-col px-6 py-6 sm:justify-center">
+      <div className="mx-auto flex w-full max-w-3xl animate-fade-in flex-col gap-[30px]">
+        <div className="flex flex-col gap-3">
+          <h2 className="font-serif text-[30px] font-normal leading-[1.2] tracking-[-0.01em] text-ink dark:text-mist sm:text-[34px]">
+            What kind of home
+            <br />
+            are you looking for?
+          </h2>
+          <p className="max-w-[480px] text-[15px] leading-relaxed text-ink-muted dark:text-mist-muted">
+            Describe it the way you would to an agent — neighbourhood, budget, number of rooms.
+            Sarah searches the live listings and answers with what actually matches.
+          </p>
+        </div>
 
-      <div className="mt-8 grid w-full max-w-xl gap-2.5 sm:grid-cols-2">
-        {SUGGESTIONS.map((s) => (
-          <button
-            key={s}
-            type="button"
-            disabled={isSending}
-            onClick={() => void send(s)}
-            className="group rounded-2xl border border-slate-200 bg-white/70 px-4 py-3 text-left text-sm text-slate-700 shadow-soft transition-all hover:-translate-y-0.5 hover:border-primary-300 hover:shadow-lift disabled:opacity-60 dark:border-white/10 dark:bg-ink-800/60 dark:text-slate-200 dark:hover:border-primary-500/50"
-          >
-            <span className="line-clamp-2">{s}</span>
-            <span className="mt-1 flex items-center gap-1 text-xs font-medium text-primary-500 opacity-0 transition group-hover:opacity-100">
-              Ask this
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </span>
-          </button>
-        ))}
+        <div className="flex flex-col gap-3">
+          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-faint dark:text-mist-faint">
+            Or start with one of these
+          </p>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            {SUGGESTIONS.map(({ label, prompt }) => (
+              <button
+                key={prompt}
+                type="button"
+                disabled={isSending}
+                onClick={() => void send(prompt)}
+                className="flex flex-col gap-2.5 rounded-card border border-edge bg-paper-card p-4 text-left transition-colors hover:border-forest-bright focus-visible:outline-none focus-visible:border-forest-bright focus-visible:ring-[3px] focus-visible:ring-forest-soft disabled:opacity-60 dark:border-night-edge dark:bg-night-panel dark:hover:border-forest-bright dark:focus-visible:ring-forest-accent/25"
+              >
+                <span className="font-mono text-[10px] uppercase tracking-[0.13em] text-ink-faint dark:text-mist-faint">
+                  {label}
+                </span>
+                <span className="text-[14.5px] leading-[1.5] text-ink-body dark:text-mist-dim">
+                  {prompt}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

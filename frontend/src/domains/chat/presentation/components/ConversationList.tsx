@@ -13,19 +13,21 @@ export function ConversationList({ onSelect }: { onSelect?: () => void }) {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center py-8 text-slate-500">
+      <div className="flex justify-center py-8 text-moss-faint">
         <Spinner className="h-5 w-5" />
       </div>
     );
   }
 
   if (isError) {
-    return <p className="px-3 py-4 text-sm text-slate-500">Couldn’t load conversations.</p>;
+    return <p className="px-3 py-4 text-[13.5px] text-moss-muted">Couldn’t load conversations.</p>;
   }
 
   if (!conversations || conversations.length === 0) {
     return (
-      <p className="px-3 py-4 text-sm text-slate-500">No conversations yet. Start a new chat.</p>
+      <p className="px-3 py-4 text-[13.5px] leading-relaxed text-moss-muted">
+        No conversations yet. Start a new one above.
+      </p>
     );
   }
 

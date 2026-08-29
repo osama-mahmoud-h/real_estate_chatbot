@@ -16,8 +16,10 @@ export function ThemeToggle({ className }: { className?: string }) {
       aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
       title={isDark ? 'Light mode' : 'Dark mode'}
       className={cn(
-        'relative inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition-colors',
-        'hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-slate-100',
+        'relative inline-flex h-[38px] w-[38px] items-center justify-center rounded-control transition-colors',
+        'border border-edge bg-paper text-ink-muted hover:bg-paper-sunk',
+        'dark:border-night-strong dark:bg-night-raised dark:text-mist-muted dark:hover:bg-night-panel',
+        'focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-forest-soft dark:focus-visible:ring-forest-accent/25',
         className,
       )}
     >
@@ -40,11 +42,11 @@ export function ThemeToggle({ className }: { className?: string }) {
 function SunIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="2" />
+      <circle cx="12" cy="12" r="4.2" stroke="currentColor" strokeWidth="1.8" />
       <path
-        d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
+        d="M12 2.6v2.2M12 19.2v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.6 12h2.2M19.2 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"
         stroke="currentColor"
-        strokeWidth="2"
+        strokeWidth="1.8"
         strokeLinecap="round"
       />
     </svg>
@@ -55,9 +57,9 @@ function MoonIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
       <path
-        d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"
+        d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
         stroke="currentColor"
-        strokeWidth="2"
+        strokeWidth="1.8"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
