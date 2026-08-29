@@ -1,3 +1,4 @@
+import { BrandLockup } from '@/shared/ui/BrandMark';
 import { NewChatButton } from './NewChatButton';
 import { ConversationList } from './ConversationList';
 import { UserProfileButton } from './UserProfileButton';
@@ -5,29 +6,23 @@ import { UserProfileButton } from './UserProfileButton';
 /** Left panel: brand + new chat + history (top), user profile pinned bottom. */
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   return (
-    <div className="flex h-full w-72 flex-col bg-ink-900 text-slate-300">
-      <div className="flex items-center gap-2.5 px-4 pb-2 pt-4">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-gradient text-base shadow-lift">
-          🏠
-        </div>
-        <div className="leading-tight">
-          <p className="text-sm font-semibold text-white">Estate Assistant</p>
-          <p className="text-[11px] text-slate-500">AI property search</p>
-        </div>
+    <div className="flex h-full w-72 flex-col border-r border-[#0E2A1F] bg-forest-deep dark:border-night-edge dark:bg-night-bar">
+      <div className="px-[18px] pb-[18px] pt-5">
+        <BrandLockup />
       </div>
 
-      <div className="shrink-0 p-3">
+      <div className="shrink-0 px-3.5">
         <NewChatButton onDone={onNavigate} />
       </div>
 
-      <div className="flex-1 overflow-y-auto px-2 pb-2 scrollbar-dark">
-        <p className="px-3 pb-1.5 pt-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-          Recent
+      <div className="scrollbar-dark flex-1 overflow-y-auto px-2.5 pb-2">
+        <p className="px-[18px] pb-2.5 pt-[26px] font-mono text-[10px] uppercase tracking-[0.14em] text-moss-faint">
+          Recent clients
         </p>
         <ConversationList onSelect={onNavigate} />
       </div>
 
-      <div className="shrink-0 border-t border-white/10 p-2">
+      <div className="shrink-0 border-t border-paper/10 p-3.5 dark:border-night-edge">
         <UserProfileButton />
       </div>
     </div>

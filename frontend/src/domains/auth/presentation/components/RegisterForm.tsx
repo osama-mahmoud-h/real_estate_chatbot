@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { Input } from '@/shared/ui/Input';
 import { PasswordInput } from '@/shared/ui/PasswordInput';
 import { Button } from '@/shared/ui/Button';
+import { MailIcon, LockIcon, PersonIcon, PhoneIcon } from '@/shared/ui/FieldIcons';
 import { toApiErrorMessage } from '@/shared/api/httpClient';
 import { saveCredential } from '@/shared/lib/credentials';
 import { fullName } from '../../domain/User';
@@ -39,52 +40,66 @@ export function RegisterForm() {
   });
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4" noValidate>
-      <div className="grid grid-cols-2 gap-3">
-        <Input
-          label="First name"
-          autoComplete="given-name"
-          error={errors.firstName?.message}
-          {...register('firstName')}
-        />
-        <Input
-          label="Last name"
-          autoComplete="family-name"
-          error={errors.lastName?.message}
-          {...register('lastName')}
-        />
-      </div>
+    <form onSubmit={onSubmit} className="space-y-3.5" noValidate>
       <Input
-        label="Email"
+        variant="pill"
+        leading={<PersonIcon />}
+        aria-label="First name"
+        autoComplete="given-name"
+        placeholder="First name"
+        error={errors.firstName?.message}
+        {...register('firstName')}
+      />
+      <Input
+        variant="pill"
+        leading={<PersonIcon />}
+        aria-label="Last name"
+        autoComplete="family-name"
+        placeholder="Last name"
+        error={errors.lastName?.message}
+        {...register('lastName')}
+      />
+      <Input
+        variant="pill"
+        leading={<MailIcon />}
         type="email"
+        aria-label="Email address"
         autoComplete="email"
-        placeholder="you@example.com"
+        placeholder="Email address"
         error={errors.email?.message}
         {...register('email')}
       />
       <Input
-        label="Phone number"
+        variant="pill"
+        leading={<PhoneIcon />}
         type="tel"
+        aria-label="Phone number"
         autoComplete="tel"
-        placeholder="+20 100 000 0000"
+        placeholder="Phone number"
         error={errors.phoneNumber?.message}
         {...register('phoneNumber')}
       />
       <PasswordInput
-        label="Password"
+        variant="pill"
+        leading={<LockIcon />}
+        aria-label="Password"
         autoComplete="new-password"
-        placeholder="At least 8 characters"
+        placeholder="Password (8 characters or more)"
         error={errors.password?.message}
         {...register('password')}
       />
 
       {registerMutation.isError && (
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p className="rounded-2xl border border-brick/25 bg-brick-soft px-4 py-2.5 text-center text-sm text-brick dark:border-brick-bright/30 dark:bg-brick-bright/10 dark:text-brick-bright">
           {toApiErrorMessage(registerMutation.error, 'Registration failed. Try again.')}
         </p>
       )}
 
-      <Button type="submit" size="lg" loading={registerMutation.isPending} className="w-full">
+      <Button
+        type="submit"
+        loading={registerMutation.isPending}
+        className="mt-1.5 h-14 w-full rounded-full text-[15px] shadow-[0_4px_14px_rgba(28,79,53,0.22)] dark:shadow-none"
+      >
         Create account
       </Button>
     </form>

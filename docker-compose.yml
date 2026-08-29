@@ -7,29 +7,23 @@ services:
     container_name: real-estate-chatbot
     ports:
       - "8080:8080"
+    # Credentials, model selection and chatbot settings all come from backend/.env.
+    env_file:
+      - backend/.env
+    # Only the values that differ inside the container network are overridden here;
+    # `environment` wins over `env_file`.
     environment:
-      # Database
       DATABASE_HOST: postgres
       DATABASE_PORT: 5432
-      DATABASE_NAME: ${DATABASE_NAME:-chatbot_db}
+      DATABASE_NAME: ${DATABASE_NAME:-real_estate_chatbot_db}
       DATABASE_USERNAME: ${DATABASE_USERNAME:-postgres}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD:-postgres}
-
-      # AI Provider Credentials (required)
-      GOOGLE_AI_API_KEY: ${GOOGLE_AI_API_KEY}
-      COHERE_API_KEY: ${COHERE_API_KEY}
-
-      # AI Model Selection (cloud providers)
-      AI_CHAT_PROVIDER: ${AI_CHAT_PROVIDER:-gemini}
-      AI_CHAT_MODEL: ${AI_CHAT_MODEL:-gemini-2.5-flash}
-      AI_EMBEDDING_PROVIDER: ${AI_EMBEDDING_PROVIDER:-cohere}
-      AI_EMBEDDING_MODEL: ${AI_EMBEDDING_MODEL:-embed-multilingual-v3.0}
-
-      # JWT
-      JWT_SECRET: ${JWT_SECRET:-Y2hhbmdlLXRoaXMtaW4tcHJvZHVjdGlvbi1wbGVhc2U=}
-
-      # Spring profiles
+      SCHEMA_POSTGRES_URL: jdbc:postgresql://postgres:5432/real_estate_db
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      SERVER_PORT: 8080
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       postgres:
         condition: service_healthy
@@ -41,16 +35,19 @@ services:
     image: pgvector/pgvector:pg16
     container_name: chatbot-postgres
     environment:
-      POSTGRES_DB: ${DATABASE_NAME:-chatbot_db}
+      POSTGRES_DB: ${DATABASE_NAME:-real_estate_chatbot_db}
       POSTGRES_USER: ${DATABASE_USERNAME:-postgres}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-postgres}
     ports:
-      - "5435:5432"
+      - "${DATABASE_PORT:-5433}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./backend/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+      # Read by init-db.sql; a subdirectory is not auto-executed by the entrypoint.
+      - ./backend/core-ai/src/main/resources/db:/docker-entrypoint-initdb.d/seed:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USERNAME:-postgres} -d ${DATABASE_NAME:-chatbot_db}"]
+      # psql (unlike pg_isready) fails when the database itself is missing.
+      test: ["CMD-SHELL", "psql -U ${DATABASE_USERNAME:-postgres} -d ${DATABASE_NAME:-real_estate_chatbot_db} -c 'SELECT 1' > /dev/null"]
       interval: 10s
       timeout: 5s
       retries: 5

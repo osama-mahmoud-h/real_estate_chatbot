@@ -5,10 +5,9 @@ export type Theme = 'light' | 'dark';
 
 const STORAGE_KEY = 'estate.theme';
 
-/** Reads the OS-level colour-scheme preference (defaults to light). */
+/** Defaults to light instead of system preference. */
 function systemTheme(): Theme {
-  if (typeof window === 'undefined' || !window.matchMedia) return 'light';
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  return 'light'; // per user request: don't make default as dark
 }
 
 /** Toggles the `dark` class on <html>, which drives all Tailwind `dark:` styles. */
@@ -60,7 +59,7 @@ export function initTheme(): void {
       }
     }
   } catch {
-    /* fall back to system preference */
+    /* fall back to user preference */
   }
   applyTheme(theme);
 }
