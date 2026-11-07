@@ -7,13 +7,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.bsc.langgraph4j.action.NodeAction;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.stereotype.Component;
+import semsem.chatbot.orchestration.common.FlowNames;
 import semsem.chatbot.orchestration.dbchat.output.QueryAnalyzerOutput;
 import semsem.chatbot.orchestration.dbchat.output.SqlExecutorOutput;
 import semsem.chatbot.orchestration.dbchat.state.ChatMessage;
+import semsem.chatbot.orchestration.dbchat.state.DbChatNodes;
 import semsem.chatbot.orchestration.dbchat.state.DbChatState;
 import semsem.chatbot.prompt.builder.ChatPromptFactory;
-import semsem.chatbot.service.llm.gateway.LLMGateway;
-import semsem.chatbot.service.response.ResponseFallbacks;
+import semsem.chatbot.llm.gateway.LLMGateway;
+import semsem.chatbot.orchestration.common.ResponseFallbacks;
 
 import java.util.List;
 import java.util.Map;
@@ -41,9 +43,20 @@ public class FinalResponseBuilderNode implements NodeAction<DbChatState> {
 
     private String generate(DbChatState state) {
         try {
-            return llmGateway.invoke(buildPrompt(state));
+            log.debug("Building final natural-language response for conversationId={}", state.conversationId());
+            String reply = llmGateway.invoke(
+                    FlowNames.DB_CHAT,
+                    DbChatNodes.FINAL_RESPONSE,
+                    buildPrompt(state));
+            if (reply == null || reply.isBlank()) {
+                log.warn("FinalResponseBuilderNode received blank LLM response for conversationId={}; using deterministic fallback",
+                        state.conversationId());
+                return responseFallbacks.forResults(state.sqlExecution());
+            }
+            return reply;
         } catch (Exception e) {
-            log.error("Failed to generate response: {}", e.getMessage(), e);
+            log.error("Failed to generate final response for conversationId={}: {}",
+                    state.conversationId(), e.getMessage(), e);
             return responseFallbacks.forResults(state.sqlExecution());
         }
     }

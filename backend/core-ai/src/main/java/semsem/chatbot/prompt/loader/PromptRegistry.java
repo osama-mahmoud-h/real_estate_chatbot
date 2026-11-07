@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
-import semsem.chatbot.exception.PromptLoadException;
+import semsem.chatbot.prompt.PromptLoadException;
 import semsem.chatbot.prompt.ChatPromptTemplate;
 import semsem.chatbot.prompt.PromptTemplate;
 

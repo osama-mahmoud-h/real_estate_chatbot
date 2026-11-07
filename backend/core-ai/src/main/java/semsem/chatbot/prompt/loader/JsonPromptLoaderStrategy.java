@@ -3,7 +3,7 @@ package semsem.chatbot.prompt.loader;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import semsem.chatbot.exception.PromptLoadException;
+import semsem.chatbot.prompt.PromptLoadException;
 
 import java.io.IOException;
 import java.io.InputStream;

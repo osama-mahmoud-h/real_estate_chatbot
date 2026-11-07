@@ -8,8 +8,8 @@ import semsem.chatbot.rag.DocumentChunk;
 import semsem.chatbot.rag.loader.DocumentLoader;
 import semsem.chatbot.rag.retriever.Retriever;
 import semsem.chatbot.rag.splitter.TextSplitter;
-import semsem.chatbot.service.embedding.EmbeddingService;
-import semsem.chatbot.service.llm.LLMService;
+import semsem.chatbot.embedding.service.EmbeddingService;
+import semsem.chatbot.llm.gateway.LLMGateway;
 import semsem.chatbot.vectorstore.VectorStore;
 
 import java.util.List;
@@ -27,7 +27,7 @@ public class RAGPipeline {
     private final EmbeddingService embeddingService;
     private final VectorStore vectorStore;
     private final Retriever retriever;
-    private final LLMService llmService;
+    private final LLMGateway llmGateway;
 
     /**
      * Ingest documents into the vector store.

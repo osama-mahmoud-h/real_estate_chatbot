@@ -1,13 +1,13 @@
 -- Runs ONLY on first initialization, when the postgres data directory is empty.
 -- An existing volume makes the entrypoint skip this file entirely.
 --
--- Connected as POSTGRES_USER to POSTGRES_DB (the chatbot's own database, already
--- created by the entrypoint). psql runs this with ON_ERROR_STOP=1.
+-- Connected as POSTGRES_USER to POSTGRES_DB (the chatbot's own primary database,
+-- whose schema and seed data are managed by Liquibase XML changelogs at startup).
 
 CREATE EXTENSION IF NOT EXISTS vector;
 CREATE EXTENSION IF NOT EXISTS dblink;
 
--- Business database the chatbot introspects and queries.
+-- External business database that the chatbot introspects and queries via Text-to-SQL.
 -- Name must match SCHEMA_POSTGRES_URL in backend/.env.
 DO $$
     BEGIN
@@ -19,6 +19,6 @@ $$;
 
 \connect real_estate_db
 
-\i /docker-entrypoint-initdb.d/seed/v1_real_estate_schema_ddl.sql
-\i /docker-entrypoint-initdb.d/seed/v1_real_estate_schema_dml.sql
-\i /docker-entrypoint-initdb.d/seed/v2_schema_comments.sql
+\i /docker-entrypoint-initdb.d/external/v1_real_estate_schema_ddl.sql
+\i /docker-entrypoint-initdb.d/external/v1_real_estate_schema_dml.sql
+\i /docker-entrypoint-initdb.d/external/v2_schema_comments.sql
