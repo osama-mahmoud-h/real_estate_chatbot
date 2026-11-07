@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- =========================================================================
+         002-1: Seed Default Cloud & Local LLM Providers
+         ========================================================================= -->
+    <changeSet id="002-1-seed-llm-providers" author="semsem">
+        <validCheckSum>ANY</validCheckSum>
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="llm_providers"/>
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM llm_providers</sqlCheck>
+        </preConditions>
+
+        <comment>Seed default Cloud (OpenRouter, Gemini, Cohere, Anthropic, TogetherAI, HuggingFace) and Local (Ollama, vLLM) providers</comment>
+
+        <insert tableName="llm_providers">
+            <column name="provider_type" value="CLOUD"/>
+            <column name="provider_key" value="openrouter"/>
+            <column name="display_name" value="OpenRouter"/>
+            <column name="base_url" value="https://openrouter.ai/api/v1"/>
+            <column name="api_key" value=""/>
+            <column name="extra_config" valueComputed="'{}'::jsonb"/>
+            <column name="enabled" valueBoolean="true"/>
+        </insert>
+
+        <insert tableName="llm_providers">
+            <column name="provider_type" value="CLOUD"/>
+            <column name="provider_key" value="gemini"/>
+            <column name="display_name" value="Google Gemini"/>
+            <column name="base_url" value="https://generativelanguage.googleapis.com"/>
+            <column name="api_key" value=""/>
+            <column name="extra_config" valueComputed="'{}'::jsonb"/>
+            <column name="enabled" valueBoolean="true"/>
+        </insert>
+
+        <insert tableName="llm_providers">
+            <column name="provider_type" value="CLOUD"/>
+            <column name="provider_key" value="cohere"/>
+            <column name="display_name" value="Cohere"/>
+            <column name="base_url" value="https://api.cohere.ai/compatibility/v1"/>
+            <column name="api_key" value=""/>
+            <column name="extra_config" valueComputed="'{}'::jsonb"/>
+            <column name="enabled" valueBoolean="true"/>
+        </insert>
+
+        <insert tableName="llm_providers">
+            <column name="provider_type" value="CLOUD"/>
+            <column name="provider_key" value="anthropic"/>
+            <column name="display_name" value="Anthropic"/>
+            <column name="base_url" value="https://api.anthropic.com"/>
+            <column name="api_key" value=""/>
+            <column name="extra_config" valueComputed="'{}'::jsonb"/>
+            <column name="enabled" valueBoolean="true"/>
+        </insert>
+
+        <insert tableName="llm_providers">
+            <column name="provider_type" value="CLOUD"/>
+            <column name="provider_key" value="togetherai"/>
+            <column name="display_name" value="Together AI"/>
+            <column name="base_url" value="https://api.together.xyz/v1"/>
+            <column name="api_key" value=""/>
+            <column name="extra_config" valueComputed="'{}'::jsonb"/>
+            <column name="enabled" valueBoolean="true"/>
+        </insert>
+
+        <insert tableName="llm_providers">
+            <column name="provider_type" value="CLOUD"/>
+            <column name="provider_key" value="huggingface"/>
+            <column name="display_name" value="HuggingFace"/>
+            <column name="base_url" value="https://api-inference.huggingface.co"/>
+            <column name="api_key" value=""/>
+            <column name="extra_config" valueComputed="'{}'::jsonb"/>
+            <column name="enabled" valueBoolean="true"/>
+        </insert>
+
+        <insert tableName="llm_providers">
+            <column name="provider_type" value="LOCAL"/>
+            <column name="provider_key" value="ollama"/>
+            <column name="display_name" value="Ollama Local"/>
+            <column name="base_url" value="http://localhost:11434"/>
+            <column name="timeout_seconds" valueNumeric="120"/>
+            <column name="keep_alive" value="5m"/>
+            <column name="extra_config" valueComputed="'{}'::jsonb"/>
+            <column name="enabled" valueBoolean="true"/>
+        </insert>
+
+        <insert tableName="llm_providers">
+            <column name="provider_type" value="LOCAL"/>
+            <column name="provider_key" value="vllm"/>
+            <column name="display_name" value="vLLM Local"/>
+            <column name="base_url" value="http://localhost:8000/v1"/>
+            <column name="timeout_seconds" valueNumeric="120"/>
+            <column name="extra_config" valueComputed="'{}'::jsonb"/>
+            <column name="enabled" valueBoolean="true"/>
+        </insert>
+
+        <rollback>
+            <delete tableName="llm_providers">
+                <where>provider_key IN ('openrouter', 'gemini', 'cohere', 'anthropic', 'togetherai', 'huggingface', 'ollama', 'vllm')</where>
+            </delete>
+        </rollback>
+    </changeSet>
+
+    <!-- =========================================================================
+         002-2: Seed Default Chat & Embedding Models
+         ========================================================================= -->
+    <changeSet id="002-2-seed-llm-models" author="semsem">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="llm_models"/>
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM llm_models</sqlCheck>
+        </preConditions>
+
+        <comment>Seed default ChatLlmModel and EmbeddingLlmModel catalog</comment>
+
+        <!-- OpenRouter Chat Models -->
+        <insert tableName="llm_models">
+            <column name="model_type" value="CHAT"/>
+            <column name="model_key" value="openrouter_gemma31b"/>
+            <column name="model_name" value="google/gemma-3-1b-it"/>
+            <column name="provider_id" valueComputed="(SELECT provider_id FROM llm_providers WHERE provider_key = 'openrouter')"/>
+            <column name="capabilities" valueComputed="'[&quot;streaming&quot;, &quot;json-mode&quot;, &quot;system-prompt&quot;]'::jsonb"/>
+            <column name="max_tokens" valueNumeric="4096"/>
+            <column name="context_window" valueNumeric="32768"/>
+            <column name="max_output_tokens" valueNumeric="8192"/>
+            <column name="temperature" valueNumeric="0.0"/>
+            <column name="top_p" valueNumeric="0.95"/>
+            <column name="extra_config" valueComputed="'{&quot;top_k&quot;: 40}'::jsonb"/>
+            <column name="enabled" valueBoolean="true"/>
+        </insert>
+
+        <insert tableName="llm_models">
+            <column name="model_type" value="CHAT"/>
+            <column name="model_key" value="openrouter_gemma26b"/>
+            <column name="model_name" value="google/gemma-2-27b-it"/>
+            <column name="provider_id" valueComputed="(SELECT provider_id FROM llm_providers WHERE provider_key = 'openrouter')"/>
+            <column name="capabilities" valueComputed="'[&quot;streaming&quot;, &quot;function-calling&quot;, &quot;json-mode&quot;, &quot;system-prompt&quot;]'::jsonb"/>
+            <column name="max_tokens" valueNumeric="4096"/>
+            <column name="context_window" valueNumeric="131072"/>
+            <column name="max_output_tokens" valueNumeric="8192"/>
+            <column name="temperature" valueNumeric="0.0"/>
+            <column name="top_p" valueNumeric="0.95"/>
+            <column name="extra_config" valueComputed="'{&quot;top_k&quot;: 40}'::jsonb"/>
+            <column name="enabled" valueBoolean="true"/>
+        </insert>
+
+        <!-- Gemini Chat Models -->
+        <insert tableName="llm_models">
+            <column name="model_type" value="CHAT"/>
+            <column name="model_key" value="gemini_2_5_flash"/>
+            <column name="model_name" value="gemini-2.5-flash"/>
+            <column name="provider_id" valueComputed="(SELECT provider_id FROM llm_providers WHERE provider_key = 'gemini')"/>
+            <column name="capabilities" valueComputed="'[&quot;streaming&quot;, &quot;function-calling&quot;, &quot;vision&quot;, &quot;json-mode&quot;, &quot;system-prompt&quot;]'::jsonb"/>
+            <column name="max_tokens" valueNumeric="8192"/>
+            <column name="context_window" valueNumeric="1048576"/>
+            <column name="max_output_tokens" valueNumeric="8192"/>
+            <column name="temperature" valueNumeric="0.0"/>
+            <column name="top_p" valueNumeric="0.95"/>
+            <column name="extra_config" valueComputed="'{}'::jsonb"/>
+            <column name="enabled" valueBoolean="true"/>
+        </insert>
+
+        <insert tableName="llm_models">
+            <column name="model_type" value="CHAT"/>
+            <column name="model_key" value="gemini_1_5_pro"/>
+            <column name="model_name" value="gemini-1.5-pro"/>
+            <column name="provider_id" valueComputed="(SELECT provider_id FROM llm_providers WHERE provider_key = 'gemini')"/>
+            <column name="capabilities" valueComputed="'[&quot;streaming&quot;, &quot;function-calling&quot;, &quot;vision&quot;, &quot;json-mode&quot;, &quot;system-prompt&quot;]'::jsonb"/>
+            <column name="max_tokens" valueNumeric="8192"/>
+            <column name="context_window" valueNumeric="2097152"/>
+            <column name="max_output_tokens" valueNumeric="8192"/>
+            <column name="temperature" valueNumeric="0.0"/>
+            <column name="top_p" valueNumeric="0.95"/>
+            <column name="extra_config" valueComputed="'{}'::jsonb"/>
+            <column name="enabled" valueBoolean="true"/>
+        </insert>
+
+        <!-- Cohere Chat Models -->
+        <insert tableName="llm_models">
+            <column name="model_type" value="CHAT"/>
+            <column name="model_key" value="cohere_command_a"/>
+            <column name="model_name" value="command-a-03-2025"/>
+            <column name="provider_id" valueComputed="(SELECT provider_id FROM llm_providers WHERE provider_key = 'cohere')"/>
+            <column name="capabilities" valueComputed="'[&quot;streaming&quot;, &quot;function-calling&quot;, &quot;rag&quot;, &quot;system-prompt&quot;]'::jsonb"/>
+            <column name="max_tokens" valueNumeric="8192"/>
+            <column name="context_window" valueNumeric="256000"/>
+            <column name="max_output_tokens" valueNumeric="8192"/>
+            <column name="temperature" valueNumeric="0.0"/>
+            <column name="top_p" valueNumeric="0.95"/>
+            <column name="extra_config" valueComputed="'{}'::jsonb"/>
+            <column name="enabled" valueBoolean="true"/>
+        </insert>
+
+        <!-- Anthropic Chat Models -->
+        <insert tableName="llm_models">
+            <column name="model_type" value="CHAT"/>
+            <column name="model_key" value="anthropic_claude_3_7_sonnet"/>
+            <column name="model_name" value="claude-3-7-sonnet-latest"/>
+            <column name="provider_id" valueComputed="(SELECT provider_id FROM llm_providers WHERE provider_key = 'anthropic')"/>
+            <column name="capabilities" valueComputed="'[&quot;streaming&quot;, &quot;function-calling&quot;, &quot;vision&quot;, &quot;json-mode&quot;, &quot;system-prompt&quot;]'::jsonb"/>
+            <column name="max_tokens" valueNumeric="8192"/>
+            <column name="context_window" valueNumeric="200000"/>
+            <column name="max_output_tokens" valueNumeric="8192"/>
+            <column name="temperature" valueNumeric="0.0"/>
+            <column name="top_p" valueNumeric="0.95"/>
+            <column name="extra_config" valueComputed="'{}'::jsonb"/>
+            <column name="enabled" valueBoolean="true"/>
+        </insert>
+
+        <!-- Together AI Chat Models -->
+        <insert tableName="llm_models">
+            <column name="model_type" value="CHAT"/>
+            <column name="model_key" value="together_llama3_3_70b"/>
+            <column name="model_name" value="meta-llama/Llama-3.3-70B-Instruct-Turbo"/>
+            <column name="provider_id" valueComputed="(SELECT provider_id FROM llm_providers WHERE provider_key = 'togetherai')"/>
+            <column name="capabilities" valueComputed="'[&quot;streaming&quot;, &quot;function-calling&quot;, &quot;json-mode&quot;, &quot;system-prompt&quot;]'::jsonb"/>
+            <column name="max_tokens" valueNumeric="4096"/>
+            <column name="context_window" valueNumeric="131072"/>
+            <column name="max_output_tokens" valueNumeric="4096"/>
+            <column name="temperature" valueNumeric="0.0"/>
+            <column name="top_p" valueNumeric="0.95"/>
+            <column name="extra_config" valueComputed="'{}'::jsonb"/>
+            <column name="enabled" valueBoolean="true"/>
+        </insert>
+
+        <!-- HuggingFace Chat Models -->
+        <insert tableName="llm_models">
+            <column name="model_type" value="CHAT"/>
+            <column name="model_key" value="hf_llama3_2_3b"/>
+            <column name="model_name" value="meta-llama/Llama-3.2-3B-Instruct"/>
+            <column name="provider_id" valueComputed="(SELECT provider_id FROM llm_providers WHERE provider_key = 'huggingface')"/>
+            <column name="capabilities" valueComputed="'[&quot;streaming&quot;, &quot;system-prompt&quot;]'::jsonb"/>
+            <column name="max_tokens" valueNumeric="4096"/>
+            <column name="context_window" valueNumeric="32768"/>
+            <column name="max_output_tokens" valueNumeric="4096"/>
+            <column name="temperature" valueNumeric="0.0"/>
+            <column name="top_p" valueNumeric="0.95"/>
+            <column name="extra_config" valueComputed="'{}'::jsonb"/>
+            <column name="enabled" valueBoolean="true"/>
+        </insert>
+
+        <!-- Ollama Local Chat Models -->
+        <insert tableName="llm_models">
+            <column name="model_type" value="CHAT"/>
+            <column name="model_key" value="ollama_llama3_2"/>
+            <column name="model_name" value="llama3.2"/>
+            <column name="provider_id" valueComputed="(SELECT provider_id FROM llm_providers WHERE provider_key = 'ollama')"/>
+            <column name="capabilities" valueComputed="'[&quot;streaming&quot;, &quot;function-calling&quot;, &quot;system-prompt&quot;]'::jsonb"/>
+            <column name="max_tokens" valueNumeric="4096"/>
+            <column name="context_window" valueNumeric="131072"/>
+            <column name="max_output_tokens" valueNumeric="4096"/>
+            <column name="temperature" valueNumeric="0.0"/>
+            <column name="top_p" valueNumeric="0.95"/>
+            <column name="extra_config" valueComputed="'{}'::jsonb"/>
+            <column name="enabled" valueBoolean="true"/>
+        </insert>
+
+        <insert tableName="llm_models">
+            <column name="model_type" value="CHAT"/>
+            <column name="model_key" value="ollama_qwen2_5"/>
+            <column name="model_name" value="qwen2.5"/>
+            <column name="provider_id" valueComputed="(SELECT provider_id FROM llm_providers WHERE provider_key = 'ollama')"/>
+            <column name="capabilities" valueComputed="'[&quot;streaming&quot;, &quot;function-calling&quot;, &quot;system-prompt&quot;]'::jsonb"/>
+            <column name="max_tokens" valueNumeric="4096"/>
+            <column name="context_window" valueNumeric="32768"/>
+            <column name="max_output_tokens" valueNumeric="4096"/>
+            <column name="temperature" valueNumeric="0.0"/>
+            <column name="top_p" valueNumeric="0.95"/>
+            <column name="extra_config" valueComputed="'{}'::jsonb"/>
+            <column name="enabled" valueBoolean="true"/>
+        </insert>
+
+        <!-- vLLM Local Chat / VLM Models -->
+        <insert tableName="llm_models">
+            <column name="model_type" value="CHAT"/>
+            <column name="model_key" value="vllm_qwen2_5_vl_7b"/>
+            <column name="model_name" value="Qwen/Qwen2.5-VL-7B-Instruct"/>
+            <column name="provider_id" valueComputed="(SELECT provider_id FROM llm_providers WHERE provider_key = 'vllm')"/>
+            <column name="capabilities" valueComputed="'[&quot;streaming&quot;, &quot;vision&quot;, &quot;json-mode&quot;, &quot;system-prompt&quot;]'::jsonb"/>
+            <column name="max_tokens" valueNumeric="4096"/>
+            <column name="context_window" valueNumeric="32768"/>
+            <column name="max_output_tokens" valueNumeric="4096"/>
+            <column name="temperature" valueNumeric="0.0"/>
+            <column name="top_p" valueNumeric="0.95"/>
+            <column name="extra_config" valueComputed="'{}'::jsonb"/>
+            <column name="enabled" valueBoolean="true"/>
+        </insert>
+
+        <!-- Embedding Models -->
+        <insert tableName="llm_models">
+            <column name="model_type" value="EMBEDDING"/>
+            <column name="model_key" value="gemini_text_embedding_004"/>
+            <column name="model_name" value="text-embedding-004"/>
+            <column name="provider_id" valueComputed="(SELECT provider_id FROM llm_providers WHERE provider_key = 'gemini')"/>
+            <column name="capabilities" valueComputed="'[&quot;batch&quot;]'::jsonb"/>
+            <column name="dimensions" valueNumeric="768"/>
+            <column name="max_input_tokens" valueNumeric="2048"/>
+            <column name="extra_config" valueComputed="'{}'::jsonb"/>
+            <column name="enabled" valueBoolean="true"/>
+        </insert>
+
+        <insert tableName="llm_models">
+            <column name="model_type" value="EMBEDDING"/>
+            <column name="model_key" value="cohere_embed_multilingual_v3"/>
+            <column name="model_name" value="embed-multilingual-v3.0"/>
+            <column name="provider_id" valueComputed="(SELECT provider_id FROM llm_providers WHERE provider_key = 'cohere')"/>
+            <column name="capabilities" valueComputed="'[&quot;batch&quot;, &quot;multilingual&quot;, &quot;search-document&quot;, &quot;search-query&quot;]'::jsonb"/>
+            <column name="dimensions" valueNumeric="1024"/>
+            <column name="max_input_tokens" valueNumeric="512"/>
+            <column name="extra_config" valueComputed="'{}'::jsonb"/>
+            <column name="enabled" valueBoolean="true"/>
+        </insert>
+
+        <insert tableName="llm_models">
+            <column name="model_type" value="EMBEDDING"/>
+            <column name="model_key" value="ollama_nomic_embed_text"/>
+            <column name="model_name" value="nomic-embed-text"/>
+            <column name="provider_id" valueComputed="(SELECT provider_id FROM llm_providers WHERE provider_key = 'ollama')"/>
+            <column name="capabilities" valueComputed="'[&quot;batch&quot;]'::jsonb"/>
+            <column name="dimensions" valueNumeric="768"/>
+            <column name="max_input_tokens" valueNumeric="8192"/>
+            <column name="extra_config" valueComputed="'{}'::jsonb"/>
+            <column name="enabled" valueBoolean="true"/>
+        </insert>
+
+        <rollback>
+            <delete tableName="llm_models">
+                <where>model_key IN (
+                    'openrouter_gemma31b', 'openrouter_gemma26b',
+                    'gemini_2_5_flash', 'gemini_1_5_pro',
+                    'cohere_command_a', 'anthropic_claude_3_7_sonnet',
+                    'together_llama3_3_70b', 'hf_llama3_2_3b',
+                    'ollama_llama3_2', 'ollama_qwen2_5', 'vllm_qwen2_5_vl_7b',
+                    'gemini_text_embedding_004', 'cohere_embed_multilingual_v3', 'ollama_nomic_embed_text'
+                )</where>
+            </delete>
+        </rollback>
+    </changeSet>
+
+    <!-- =========================================================================
+         002-3: Seed Default Per-Flow & Per-Step LLM Assignments (db_chat)
+         ========================================================================= -->
+    <changeSet id="002-3-seed-llm-flow-step-configs" author="semsem">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="llm_flow_step_configs"/>
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM llm_flow_step_configs WHERE flow_name = 'db_chat'</sqlCheck>
+        </preConditions>
+
+        <comment>Seed default db_chat step-level LLM model assignments</comment>
+
+        <insert tableName="llm_flow_step_configs">
+            <column name="flow_name" value="db_chat"/>
+            <column name="step_name" value="entity_extractor"/>
+            <column name="model_id" valueComputed="(SELECT model_id FROM llm_models WHERE model_key = 'openrouter_gemma26b')"/>
+            <column name="max_tokens_override" valueNumeric="2048"/>
+            <column name="temperature_override" valueNumeric="0.0"/>
+            <column name="top_p_override" valueNumeric="0.95"/>
+            <column name="extra_config" valueComputed="'{}'::jsonb"/>
+            <column name="enabled" valueBoolean="true"/>
+        </insert>
+
+        <insert tableName="llm_flow_step_configs">
+            <column name="flow_name" value="db_chat"/>
+            <column name="step_name" value="sql_generator"/>
+            <column name="model_id" valueComputed="(SELECT model_id FROM llm_models WHERE model_key = 'openrouter_gemma31b')"/>
+            <column name="max_tokens_override" valueNumeric="4096"/>
+            <column name="temperature_override" valueNumeric="0.0"/>
+            <column name="top_p_override" valueNumeric="0.95"/>
+            <column name="extra_config" valueComputed="'{}'::jsonb"/>
+            <column name="enabled" valueBoolean="true"/>
+        </insert>
+
+        <insert tableName="llm_flow_step_configs">
+            <column name="flow_name" value="db_chat"/>
+            <column name="step_name" value="final_response"/>
+            <column name="model_id" valueComputed="(SELECT model_id FROM llm_models WHERE model_key = 'openrouter_gemma31b')"/>
+            <column name="max_tokens_override" valueNumeric="4096"/>
+            <column name="temperature_override" valueNumeric="0.3"/>
+            <column name="top_p_override" valueNumeric="0.95"/>
+            <column name="extra_config" valueComputed="'{}'::jsonb"/>
+            <column name="enabled" valueBoolean="true"/>
+        </insert>
+
+        <rollback>
+            <delete tableName="llm_flow_step_configs">
+                <where>flow_name = 'db_chat'</where>
+            </delete>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

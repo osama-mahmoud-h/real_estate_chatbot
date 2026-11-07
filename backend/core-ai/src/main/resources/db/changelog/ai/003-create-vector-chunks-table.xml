@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- =========================================================================
+         003-1: Create vector_chunks table for RAG document embeddings
+         ========================================================================= -->
+    <changeSet id="003-1-create-vector-chunks-table" author="semsem">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="vector_chunks"/>
+            </not>
+        </preConditions>
+
+        <comment>Create vector_chunks table for storing RAG document chunks and metadata</comment>
+
+        <createTable tableName="vector_chunks">
+            <column name="id" type="VARCHAR(36)">
+                <constraints primaryKey="true" primaryKeyName="pk_vector_chunks" nullable="false"/>
+            </column>
+            <column name="document_id" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="chunk_index" type="INT"/>
+            <column name="metadata" type="JSONB"/>
+            <column name="created_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+
+        <createIndex indexName="idx_vector_chunks_document_id" tableName="vector_chunks">
+            <column name="document_id"/>
+        </createIndex>
+
+        <createIndex indexName="idx_vector_chunks_created_at" tableName="vector_chunks">
+            <column name="created_at"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex indexName="idx_vector_chunks_created_at" tableName="vector_chunks"/>
+            <dropIndex indexName="idx_vector_chunks_document_id" tableName="vector_chunks"/>
+            <dropTable tableName="vector_chunks" cascadeConstraints="true"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- =========================================================================
+         web-001-1: Create users table and sequence (AppUser)
+         ========================================================================= -->
+    <changeSet id="web-001-1-create-users-table" author="semsem">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="users"/>
+            </not>
+        </preConditions>
+
+        <comment>Create users sequence and table for AppUser aggregate</comment>
+
+        <createSequence sequenceName="users_seq" startValue="1" incrementBy="50"/>
+
+        <createTable tableName="users">
+            <column name="user_id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="pk_users" nullable="false"/>
+            </column>
+            <column name="first_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="VARCHAR(255)"/>
+            <column name="email" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uk_users_email"/>
+            </column>
+            <column name="password" type="VARCHAR(255)"/>
+            <column name="phone_number" type="VARCHAR(255)"/>
+            <column name="enabled" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="account_non_expired" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="account_non_locked" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="credentials_non_expired" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email_verified" type="BOOLEAN" defaultValueBoolean="true"/>
+            <column name="created_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_login_at" type="TIMESTAMPTZ"/>
+        </createTable>
+
+        <rollback>
+            <dropTable tableName="users" cascadeConstraints="true"/>
+            <dropSequence sequenceName="users_seq"/>
+        </rollback>
+    </changeSet>
+
+    <!-- =========================================================================
+         web-001-2: Create user_roles collection table
+         ========================================================================= -->
+    <changeSet id="web-001-2-create-user-roles-table" author="semsem">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="users"/>
+                <not>
+                    <tableExists tableName="user_roles"/>
+                </not>
+            </and>
+        </preConditions>
+
+        <comment>Create user_roles element collection table linked to users</comment>
+
+        <createTable tableName="user_roles">
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role" type="VARCHAR(50)"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="user_roles"
+                baseColumnNames="user_id"
+                constraintName="FK_user_roles_user_id"
+                referencedTableName="users"
+                referencedColumnNames="user_id"
+                onDelete="CASCADE"/>
+
+        <createIndex indexName="idx_user_roles_user_id" tableName="user_roles">
+            <column name="user_id"/>
+        </createIndex>
+
+        <rollback>
+            <dropForeignKeyConstraint baseTableName="user_roles" constraintName="FK_user_roles_user_id"/>
+            <dropIndex indexName="idx_user_roles_user_id" tableName="user_roles"/>
+            <dropTable tableName="user_roles" cascadeConstraints="true"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
