@@ -7,7 +7,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import semsem.chatbot.orchestration.common.FlowNames;
 import semsem.chatbot.orchestration.dbchat.state.ChatMessage;
+import semsem.chatbot.orchestration.dbchat.state.DbChatNodes;
 import semsem.chatbot.orchestration.dbchat.state.DbChatState;
 import semsem.chatbot.orchestration.dbchat.output.QueryAnalyzerOutput;
 import semsem.chatbot.orchestration.dbchat.output.SqlExecutorOutput;
@@ -17,13 +19,13 @@ import semsem.chatbot.orchestration.dbchat.node.FinalResponseBuilderNode;
 import semsem.chatbot.orchestration.dbchat.node.SqlExecutorNode;
 import semsem.chatbot.orchestration.dbchat.node.SqlGeneratorNode;
 import semsem.chatbot.prompt.builder.ChatPromptFactory;
-import semsem.chatbot.service.conversation.ChatHistoryMapper;
-import semsem.chatbot.service.llm.gateway.LLMGateway;
-import semsem.chatbot.service.llm.gateway.StructuredLLMGateway;
-import semsem.chatbot.service.response.ResponseFallbacks;
-import semsem.chatbot.service.schema.SchemaProvider;
-import semsem.chatbot.service.sql.SqlQueryRunner;
-import semsem.chatbot.service.sql.SqlSafetyValidator;
+import semsem.chatbot.orchestration.common.ChatHistoryMapper;
+import semsem.chatbot.llm.gateway.LLMGateway;
+import semsem.chatbot.llm.gateway.StructuredLLMGateway;
+import semsem.chatbot.orchestration.common.ResponseFallbacks;
+import semsem.chatbot.schema.extractor.SchemaProvider;
+import semsem.chatbot.sql.SqlQueryRunner;
+import semsem.chatbot.sql.SqlSafetyValidator;
 
 import java.util.List;
 import java.util.Map;
@@ -57,11 +59,16 @@ class DbChatGraphTest {
         SqlGeneratorOutput sql = SqlGeneratorOutput.builder().generatedSql("SELECT 1").isSafe(true).build();
         SqlExecutorOutput exec = SqlExecutorOutput.builder().rowCount(3).success(true).results(List.of()).build();
 
-        when(structuredLlmGateway.invokeStructured(any(), eq(QueryAnalyzerOutput.class))).thenReturn(analysis);
-        when(structuredLlmGateway.invokeStructured(any(), eq(SqlGeneratorOutput.class))).thenReturn(sql);
+        when(structuredLlmGateway.invokeStructured(
+                eq(FlowNames.DB_CHAT), eq(DbChatNodes.ENTITY_EXTRACTOR), any(), eq(QueryAnalyzerOutput.class)))
+                .thenReturn(analysis);
+        when(structuredLlmGateway.invokeStructured(
+                eq(FlowNames.DB_CHAT), eq(DbChatNodes.SQL_GENERATOR), any(), eq(SqlGeneratorOutput.class)))
+                .thenReturn(sql);
         when(sqlSafetyValidator.isReadOnly(anyString())).thenReturn(true);
         when(sqlQueryRunner.run(any())).thenReturn(exec);
-        when(llmGateway.invoke(any())).thenReturn("Here are 3 homes.");
+        when(llmGateway.invoke(eq(FlowNames.DB_CHAT), eq(DbChatNodes.FINAL_RESPONSE), any()))
+                .thenReturn("Here are 3 homes.");
 
         DbChatGraph graph = new DbChatGraph(
                 new EntityExtractorNode(promptFactory, structuredLlmGateway, historyMapper),

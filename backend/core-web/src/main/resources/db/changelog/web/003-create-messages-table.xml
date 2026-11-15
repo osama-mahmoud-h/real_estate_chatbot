@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- =========================================================================
+         web-003-1: Create messages table and sequence
+         ========================================================================= -->
+    <changeSet id="web-003-1-create-messages-table" author="semsem">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="conversations"/>
+                <not>
+                    <tableExists tableName="messages"/>
+                </not>
+            </and>
+        </preConditions>
+
+        <comment>Create messages sequence and table with embedded TokenUsage columns</comment>
+
+        <createSequence sequenceName="messages_seq" startValue="1" incrementBy="50"/>
+
+        <createTable tableName="messages">
+            <column name="message_id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="pk_messages" nullable="false"/>
+            </column>
+            <column name="conversation_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="provider_llm" type="VARCHAR(100)"/>
+            <column name="model_used" type="VARCHAR(150)"/>
+            <!-- Embedded TokenUsage columns -->
+            <column name="prompt_tokens" type="INT"/>
+            <column name="completion_tokens" type="INT"/>
+            <column name="total_tokens" type="INT"/>
+            <column name="latency_ms" type="BIGINT"/>
+            <column name="parent_message_id" type="BIGINT"/>
+            <column name="metadata" type="JSONB"/>
+            <column name="created_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="processed_at" type="TIMESTAMPTZ"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="messages"
+                baseColumnNames="conversation_id"
+                constraintName="FK_messages_conversation_id"
+                referencedTableName="conversations"
+                referencedColumnNames="conversation_id"
+                onDelete="CASCADE"/>
+
+        <createIndex indexName="idx_conversation_created" tableName="messages">
+            <column name="conversation_id"/>
+            <column name="created_at"/>
+        </createIndex>
+
+        <createIndex indexName="idx_role_conversation" tableName="messages">
+            <column name="role"/>
+            <column name="conversation_id"/>
+        </createIndex>
+
+        <rollback>
+            <dropForeignKeyConstraint baseTableName="messages" constraintName="FK_messages_conversation_id"/>
+            <dropIndex indexName="idx_role_conversation" tableName="messages"/>
+            <dropIndex indexName="idx_conversation_created" tableName="messages"/>
+            <dropTable tableName="messages" cascadeConstraints="true"/>
+            <dropSequence sequenceName="messages_seq"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

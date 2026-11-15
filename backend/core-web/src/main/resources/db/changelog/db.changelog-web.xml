@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- Core-Web Module Database Migrations (Primary Chatbot DB) -->
+    <include file="db/changelog/web/001-create-users-tables.xml"/>
+    <include file="db/changelog/web/002-create-conversations-table.xml"/>
+    <include file="db/changelog/web/003-create-messages-table.xml"/>
+
+</databaseChangeLog>

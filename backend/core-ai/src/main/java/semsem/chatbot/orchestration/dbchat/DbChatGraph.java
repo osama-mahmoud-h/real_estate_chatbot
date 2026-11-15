@@ -70,8 +70,20 @@ public class DbChatGraph implements GraphOrchestrator<DbChatState> {
 
     @Override
     public DbChatState run(Map<String, Object> input, String threadId) {
-        RunnableConfig config = RunnableConfig.builder().threadId(threadId).build();
-        return compiledGraph.invoke(input, config)
-                .orElseThrow(() -> new IllegalStateException("Chat graph returned no final state"));
+        long startTime = System.currentTimeMillis();
+        log.debug("Starting DbChatGraph execution [threadId={}, inputKeys={}]",
+                threadId, input != null ? input.keySet() : "null");
+        try {
+            RunnableConfig config = RunnableConfig.builder().threadId(threadId).build();
+            DbChatState finalState = compiledGraph.invoke(input, config)
+                    .orElseThrow(() -> new IllegalStateException("Chat graph returned no final state"));
+            log.info("Completed DbChatGraph execution [threadId={}, elapsedMs={}]",
+                    threadId, System.currentTimeMillis() - startTime);
+            return finalState;
+        } catch (Exception ex) {
+            log.error("DbChatGraph execution failed [threadId={}, elapsedMs={}]: {}",
+                    threadId, System.currentTimeMillis() - startTime, ex.getMessage(), ex);
+            throw new IllegalStateException("Failed to execute DbChatGraph for threadId=" + threadId + ": " + ex.getMessage(), ex);
+        }
     }
 }

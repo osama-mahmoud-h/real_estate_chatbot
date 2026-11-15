@@ -43,8 +43,8 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./backend/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
-      # Read by init-db.sql; a subdirectory is not auto-executed by the entrypoint.
-      - ./backend/core-ai/src/main/resources/db:/docker-entrypoint-initdb.d/seed:ro
+      # External business database scripts read by init-db.sql.
+      - ./backend/core-ai/src/main/resources/db/external:/docker-entrypoint-initdb.d/external:ro
     healthcheck:
       # psql (unlike pg_isready) fails when the database itself is missing.
       test: ["CMD-SHELL", "psql -U ${DATABASE_USERNAME:-postgres} -d ${DATABASE_NAME:-real_estate_chatbot_db} -c 'SELECT 1' > /dev/null"]

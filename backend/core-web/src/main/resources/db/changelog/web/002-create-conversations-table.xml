@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- =========================================================================
+         web-002-1: Create conversations table and sequence
+         ========================================================================= -->
+    <changeSet id="web-002-1-create-conversations-table" author="semsem">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="users"/>
+                <not>
+                    <tableExists tableName="conversations"/>
+                </not>
+            </and>
+        </preConditions>
+
+        <comment>Create conversations sequence and table</comment>
+
+        <createSequence sequenceName="conversations_seq" startValue="1" incrementBy="50"/>
+
+        <createTable tableName="conversations">
+            <column name="conversation_id" type="BIGINT">
+                <constraints primaryKey="true" primaryKeyName="pk_conversations" nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title" type="VARCHAR(255)"/>
+            <column name="status" type="VARCHAR(50)"/>
+            <column name="token_count" type="INT" defaultValueNumeric="0"/>
+            <column name="summary" type="TEXT"/>
+            <column name="created_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="archived_at" type="TIMESTAMPTZ"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="conversations"
+                baseColumnNames="user_id"
+                constraintName="FK_tokens_user_id"
+                referencedTableName="users"
+                referencedColumnNames="user_id"
+                onDelete="CASCADE"/>
+
+        <createIndex indexName="idx_conversations_user_id" tableName="conversations">
+            <column name="user_id"/>
+        </createIndex>
+
+        <rollback>
+            <dropForeignKeyConstraint baseTableName="conversations" constraintName="FK_tokens_user_id"/>
+            <dropIndex indexName="idx_conversations_user_id" tableName="conversations"/>
+            <dropTable tableName="conversations" cascadeConstraints="true"/>
+            <dropSequence sequenceName="conversations_seq"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

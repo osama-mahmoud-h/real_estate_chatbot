@@ -5,7 +5,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import semsem.chatbot.rag.DocumentChunk;
-import semsem.chatbot.service.llm.LLMService;
+import semsem.chatbot.llm.gateway.LLMGateway;
 
 import java.util.List;
 import java.util.Map;
@@ -20,7 +20,7 @@ import java.util.Map;
 public class MultiQueryRetriever implements Retriever {
 
     private final Retriever baseRetriever;
-    private final LLMService llmService;
+    private final LLMGateway llmGateway;
     private int numQueries = 3;
     private double scoreThreshold = 0.0;
 

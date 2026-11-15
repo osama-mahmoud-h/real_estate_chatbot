@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- =========================================================================
+         001-1: Create llm_providers table (SINGLE_TABLE: CLOUD & LOCAL)
+         ========================================================================= -->
+    <changeSet id="001-1-create-llm-providers-table" author="semsem">
+        <validCheckSum>ANY</validCheckSum>
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="llm_providers"/>
+            </not>
+        </preConditions>
+
+        <comment>Create llm_providers table for CloudLlmProvider and LocalLlmProvider hierarchy</comment>
+
+        <createTable tableName="llm_providers">
+            <column name="provider_id" type="BIGSERIAL" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="pk_llm_providers" nullable="false"/>
+            </column>
+            <column name="provider_type" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="provider_key" type="VARCHAR(50)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uk_llm_providers_key"/>
+            </column>
+            <column name="display_name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="base_url" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <!-- CloudLlmProvider specific -->
+            <column name="api_key" type="VARCHAR(255)"/>
+            <!-- LocalLlmProvider specific -->
+            <column name="timeout_seconds" type="INT"/>
+            <column name="keep_alive" type="VARCHAR(30)"/>
+            <!-- Common metadata -->
+            <column name="extra_config" type="JSONB" defaultValueComputed="'{}'::jsonb"/>
+            <column name="enabled" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+
+        <createIndex indexName="idx_llm_providers_key" tableName="llm_providers" unique="true">
+            <column name="provider_key"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex indexName="idx_llm_providers_key" tableName="llm_providers"/>
+            <dropTable tableName="llm_providers" cascadeConstraints="true"/>
+        </rollback>
+    </changeSet>
+
+    <!-- =========================================================================
+         001-1b: Rename api_key_env_var -> api_key for existing databases
+         ========================================================================= -->
+    <changeSet id="001-1b-rename-api-key-env-var-to-api-key" author="semsem">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="llm_providers"/>
+            <columnExists tableName="llm_providers" columnName="api_key_env_var"/>
+        </preConditions>
+
+        <comment>Rename llm_providers.api_key_env_var to api_key so API keys are stored directly in the database</comment>
+
+        <renameColumn tableName="llm_providers"
+                      oldColumnName="api_key_env_var"
+                      newColumnName="api_key"
+                      columnDataType="VARCHAR(255)"/>
+
+        <rollback>
+            <renameColumn tableName="llm_providers"
+                          oldColumnName="api_key"
+                          newColumnName="api_key_env_var"
+                          columnDataType="VARCHAR(100)"/>
+        </rollback>
+    </changeSet>
+
+    <!-- =========================================================================
+         001-2: Create llm_models table (SINGLE_TABLE: CHAT & EMBEDDING)
+         ========================================================================= -->
+    <changeSet id="001-2-create-llm-models-table" author="semsem">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="llm_providers"/>
+                <not>
+                    <tableExists tableName="llm_models"/>
+                </not>
+            </and>
+        </preConditions>
+
+        <comment>Create llm_models table for ChatLlmModel and EmbeddingLlmModel hierarchy</comment>
+
+        <createTable tableName="llm_models">
+            <column name="model_id" type="BIGSERIAL" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="pk_llm_models" nullable="false"/>
+            </column>
+            <column name="model_type" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="model_key" type="VARCHAR(100)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uk_llm_models_key"/>
+            </column>
+            <column name="model_name" type="VARCHAR(150)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="provider_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="capabilities" type="JSONB" defaultValueComputed="'[]'::jsonb"/>
+            <!-- ChatLlmModel + GenerationParameters columns -->
+            <column name="max_tokens" type="INT"/>
+            <column name="context_window" type="INT"/>
+            <column name="max_output_tokens" type="INT"/>
+            <column name="temperature" type="DOUBLE PRECISION"/>
+            <column name="top_p" type="DOUBLE PRECISION"/>
+            <!-- EmbeddingLlmModel columns -->
+            <column name="dimensions" type="INT"/>
+            <column name="max_input_tokens" type="INT"/>
+            <!-- Common metadata -->
+            <column name="extra_config" type="JSONB" defaultValueComputed="'{}'::jsonb"/>
+            <column name="enabled" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="llm_models"
+                baseColumnNames="provider_id"
+                constraintName="FK_llm_models_provider_id"
+                referencedTableName="llm_providers"
+                referencedColumnNames="provider_id"
+                onDelete="CASCADE"/>
+
+        <createIndex indexName="idx_llm_models_key" tableName="llm_models" unique="true">
+            <column name="model_key"/>
+        </createIndex>
+
+        <createIndex indexName="idx_llm_models_provider" tableName="llm_models">
+            <column name="provider_id"/>
+        </createIndex>
+
+        <rollback>
+            <dropForeignKeyConstraint baseTableName="llm_models" constraintName="FK_llm_models_provider_id"/>
+            <dropIndex indexName="idx_llm_models_provider" tableName="llm_models"/>
+            <dropIndex indexName="idx_llm_models_key" tableName="llm_models"/>
+            <dropTable tableName="llm_models" cascadeConstraints="true"/>
+        </rollback>
+    </changeSet>
+
+    <!-- =========================================================================
+         001-3: Create llm_flow_step_configs table (Per-Flow & Per-Step Overrides)
+         ========================================================================= -->
+    <changeSet id="001-3-create-llm-flow-step-configs-table" author="semsem">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="llm_models"/>
+                <not>
+                    <tableExists tableName="llm_flow_step_configs"/>
+                </not>
+            </and>
+        </preConditions>
+
+        <comment>Create llm_flow_step_configs table mapping (flow_name, step_name) to a ChatLlmModel</comment>
+
+        <createTable tableName="llm_flow_step_configs">
+            <column name="config_id" type="BIGSERIAL" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="pk_llm_flow_step_configs" nullable="false"/>
+            </column>
+            <column name="flow_name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="step_name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="model_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="max_tokens_override" type="INT"/>
+            <column name="temperature_override" type="DOUBLE PRECISION"/>
+            <column name="top_p_override" type="DOUBLE PRECISION"/>
+            <column name="extra_config" type="JSONB" defaultValueComputed="'{}'::jsonb"/>
+            <column name="enabled" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" type="TIMESTAMPTZ" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+
+        <addUniqueConstraint
+                tableName="llm_flow_step_configs"
+                columnNames="flow_name, step_name"
+                constraintName="uk_flow_step_config"/>
+
+        <addForeignKeyConstraint
+                baseTableName="llm_flow_step_configs"
+                baseColumnNames="model_id"
+                constraintName="FK_flow_step_configs_model_id"
+                referencedTableName="llm_models"
+                referencedColumnNames="model_id"
+                onDelete="CASCADE"/>
+
+        <createIndex indexName="idx_flow_step_lookup" tableName="llm_flow_step_configs">
+            <column name="flow_name"/>
+            <column name="step_name"/>
+            <column name="enabled"/>
+        </createIndex>
+
+        <rollback>
+            <dropForeignKeyConstraint baseTableName="llm_flow_step_configs" constraintName="FK_flow_step_configs_model_id"/>
+            <dropUniqueConstraint tableName="llm_flow_step_configs" constraintName="uk_flow_step_config"/>
+            <dropIndex indexName="idx_flow_step_lookup" tableName="llm_flow_step_configs"/>
+            <dropTable tableName="llm_flow_step_configs" cascadeConstraints="true"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

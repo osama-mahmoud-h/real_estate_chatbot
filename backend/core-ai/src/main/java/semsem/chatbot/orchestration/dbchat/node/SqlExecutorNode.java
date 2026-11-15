@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.bsc.langgraph4j.action.NodeAction;
 import org.springframework.stereotype.Component;
 import semsem.chatbot.orchestration.dbchat.state.DbChatState;
-import semsem.chatbot.service.sql.SqlQueryRunner;
+import semsem.chatbot.sql.SqlQueryRunner;
 
 import java.util.Map;
 
